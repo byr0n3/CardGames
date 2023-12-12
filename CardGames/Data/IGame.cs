@@ -1,15 +1,16 @@
 namespace CardGames.Data
 {
-	public interface IGame
+	public interface IGame<TPlayer> where TPlayer : IPlayer<TPlayer>
 	{
+		// @todo Custom Code struct
 		public string Code { get; }
-		public System.Guid Host { get; }
+		public TPlayer Host { get; }
 
 		public int MinPlayers { get; }
 		public int MaxPlayers { get; }
 		public int PlayerCount { get; }
 
-		public bool TryJoin(out System.Guid guid);
-		public bool TryLeave(System.Guid guid);
+		public bool TryJoin(out TPlayer? player);
+		public bool TryLeave(TPlayer player);
 	}
 }

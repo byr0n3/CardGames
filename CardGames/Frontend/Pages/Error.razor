@@ -1,8 +1,8 @@
-﻿@page "/Error"
+﻿@page "/error"
 @using System.Diagnostics
 @using Microsoft.AspNetCore.Http
 
-<pagetitle>Error</pagetitle>
+<PageTitle>Error</PageTitle>
 
 <h1 class="text-danger">Error.</h1>
 <h2 class="text-danger">An error occurred while processing your request.</h2>
@@ -26,10 +26,13 @@
 </p>
 
 @code{
+
 	[CascadingParameter] private HttpContext? HttpContext { get; set; }
 
 	private string? RequestId { get; set; }
-	private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
+	private bool ShowRequestId =>
+		!string.IsNullOrEmpty(RequestId);
 
 	protected override void OnInitialized() =>
 		RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;

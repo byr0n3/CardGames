@@ -1,0 +1,20 @@
+﻿@page "/host"
+@using CardGames.Frontend.Components
+@rendermode RenderMode.InteractiveServer
+
+<PageTitle>Host Game</PageTitle>
+
+@if (game is null || player is null)
+{
+	<h1>Host Game</h1>
+
+	<input @bind="@(displayName)" type="text" class="form-control" minlength="0" />
+
+	<button type="button" class="btn btn-primary" @onclick="@(OnHostGame)">
+		Host Game
+	</button>
+}
+else
+{
+	<GameView Game="@(game)" CurrentPlayer="@(player)" />
+}

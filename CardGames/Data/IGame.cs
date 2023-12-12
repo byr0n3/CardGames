@@ -7,10 +7,8 @@ namespace CardGames.Data
 		public TPlayer Host { get; }
 
 		public int MinPlayers { get; }
-		public int MaxPlayers { get; }
-		public int PlayerCount { get; }
 
-		public bool TryJoin(out TPlayer? player);
-		public bool TryLeave(TPlayer player);
+		public bool TryJoin(System.ReadOnlySpan<char> name, out TPlayer? player);
+		public bool TryLeave(TPlayer player, out bool wasHost);
 	}
 }

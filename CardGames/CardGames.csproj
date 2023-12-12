@@ -2,6 +2,7 @@
 
 	<PropertyGroup>
 		<UserSecretsId>8ad38042-8fda-4e82-93b3-10a4e8b72651</UserSecretsId>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 </Project>

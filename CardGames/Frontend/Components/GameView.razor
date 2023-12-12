@@ -1,0 +1,59 @@
+@using CardGames.Data
+@using CardGames.Extensions
+@implements System.IDisposable
+
+<h1>Game code: @(Game.Code)</h1>
+<p>Your name: @(CurrentPlayer.Name.Str())</p>
+
+<button type="button" class="btn btn-danger" @onclick="@(LeaveGame)">
+	Leave
+</button>
+
+<ul role="list">
+	@foreach (var player in Game.Players)
+	{
+		if (player.Key != CurrentPlayer.Key)
+		{
+			<li>@(player.Name.Str())</li>
+		}
+	}
+</ul>
+
+@code {
+
+	[Inject] public required GameManager GameManager { get; init; }
+
+	[Inject] public required NavigationManager NavigationManager { get; init; }
+
+	[Parameter] public required BaseGame<BasePlayer> Game { get; set; }
+
+	[Parameter] public required BasePlayer CurrentPlayer { get; set; }
+
+	protected override void OnInitialized()
+	{
+		Game.OnPlayerJoined += Refresh;
+		Game.OnPlayerLeft += Refresh;
+		Game.OnGameDestroyed += OnGameDestroyed;
+	}
+
+	private void Refresh(BasePlayer _) =>
+		InvokeAsync(StateHasChanged);
+
+	// @todo Update UI instead of refresh
+	private void OnGameDestroyed() =>
+		NavigationManager.Refresh(true);
+
+	// @todo Update UI instead of refresh
+	private void LeaveGame() =>
+		NavigationManager.Refresh(true);
+
+	public void Dispose()
+	{
+		Game.OnPlayerJoined -= Refresh;
+		Game.OnPlayerLeft -= Refresh;
+		Game.OnGameDestroyed -= OnGameDestroyed;
+
+		GameManager.Leave(Game, CurrentPlayer);
+	}
+
+}

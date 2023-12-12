@@ -1,23 +1,22 @@
+using System.Diagnostics.CodeAnalysis;
 using CardGames.Utilities;
 
 namespace CardGames.Data
 {
-	public class BaseGame<TPlayer> : IGame<TPlayer> where TPlayer : class, IPlayer<TPlayer>
+	public class BaseGame<TPlayer> : IGame<TPlayer>, System.IDisposable where TPlayer : class, IPlayer<TPlayer>
 	{
 		public string Code { get; }
 
 		public int MinPlayers { get; }
 
-		private readonly PlayerList<TPlayer> players;
+		public readonly PlayerList<TPlayer> Players;
 
-		public int MaxPlayers =>
-			this.players.Max;
-
-		public int PlayerCount =>
-			this.players.Current;
+		public event System.Action<TPlayer>? OnPlayerJoined;
+		public event System.Action<TPlayer>? OnPlayerLeft;
+		public event System.Action? OnGameDestroyed;
 
 		public TPlayer Host =>
-			this.players[0];
+			this.Players[0];
 
 		public BaseGame(string code, int minPlayers, int maxPlayers)
 		{
@@ -25,13 +24,36 @@ namespace CardGames.Data
 
 			this.MinPlayers = minPlayers;
 
-			this.players = new PlayerList<TPlayer>(maxPlayers);
+			this.Players = new PlayerList<TPlayer>(maxPlayers);
 		}
 
-		public bool TryJoin(out TPlayer? player) =>
-			this.players.TryJoin(out player);
+		public bool TryJoin(System.ReadOnlySpan<char> name, [NotNullWhen(true)] out TPlayer? player)
+		{
+			if (!this.Players.TryJoin(name, out player))
+			{
+				return false;
+			}
 
-		public bool TryLeave(TPlayer player) =>
-			this.players.TryLeave(player);
+			this.OnPlayerJoined?.Invoke(player);
+			return true;
+		}
+
+		public bool TryLeave(TPlayer player, out bool wasHost)
+		{
+			if (!this.Players.TryLeave(player, out wasHost))
+			{
+				return false;
+			}
+
+			this.OnPlayerLeft?.Invoke(player);
+			return true;
+		}
+
+		public void Dispose()
+		{
+			this.OnGameDestroyed?.Invoke();
+
+			System.GC.SuppressFinalize(this);
+		}
 	}
 }

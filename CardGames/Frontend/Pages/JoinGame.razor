@@ -1,0 +1,35 @@
+﻿@page "/join"
+@using CardGames.Frontend.Components
+@rendermode RenderMode.InteractiveServer
+
+<PageTitle>Join Game</PageTitle>
+
+@if (game is null || player is null)
+{
+	<h1>Join Game</h1>
+
+	@if (error)
+	{
+		<div class="alert alert-danger" role="alert">
+			Couldn't find a game with that code!
+		</div>
+	}
+
+	<label>
+		Game code:
+		<input @bind="@(code)" type="text" class="form-control" minlength="0" />
+	</label>
+
+	<label>
+		Display name:
+		<input @bind="@(displayName)" type="text" class="form-control" minlength="0" />
+	</label>
+
+	<button type="button" class="btn btn-primary" @onclick="@(OnJoinGame)">
+		Join Game
+	</button>
+}
+else
+{
+	<GameView Game="@(game)" CurrentPlayer="@(player)" />
+}

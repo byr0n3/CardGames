@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using CardGames.Data;
 
 namespace CardGames.Utilities
 {
-	internal sealed class PlayerList<TPlayer> : IEnumerable<TPlayer> where TPlayer : class, IPlayer<TPlayer>
+	public sealed class PlayerList<TPlayer> : IEnumerable<TPlayer> where TPlayer : class, IPlayer<TPlayer>
 	{
 		public int Max { get; }
 		public int Current { get; private set; }
@@ -24,7 +25,7 @@ namespace CardGames.Utilities
 			this.array = new TPlayer[this.Max];
 		}
 
-		public bool TryJoin(out TPlayer? player)
+		public bool TryJoin(System.ReadOnlySpan<char> name, [NotNullWhen(true)] out TPlayer? player)
 		{
 			if (this.Current >= this.Max)
 			{
@@ -32,31 +33,27 @@ namespace CardGames.Utilities
 				return false;
 			}
 
-			player = TPlayer.Create(this.nextIdx++);
+			player = TPlayer.Create(this.nextIdx++, name);
 
 			this.array[this.Current++] = player;
 			return true;
 		}
 
-		public bool TryLeave(TPlayer player)
+		public bool TryLeave(TPlayer player, out bool wasHost)
 		{
 			if (!this.GetPlayerIndex(player, out var idx))
 			{
+				wasHost = false;
 				return false;
 			}
 
-			// @todo Player is host, delete game
-			if (idx == 0)
-			{
-				return true;
-			}
-
-			// Player we want to remove is at the end, just set it to null
-			if (idx == this.Current - 1)
+			// Player we want to remove is at the start or at the end, just set it to null
+			if ((idx == 0) || (idx == this.Current - 1))
 			{
 				this.array[idx] = null;
 				this.Current--;
 
+				wasHost = (idx == 0);
 				return true;
 			}
 
@@ -68,18 +65,23 @@ namespace CardGames.Utilities
 
 			this.Current--;
 
+			wasHost = false;
 			return true;
 		}
 
 		private bool GetPlayerIndex(TPlayer player, out int idx)
 		{
-			for (var i = 0; i < this.Current; i++)
+			var i = 0;
+
+			foreach (var item in this)
 			{
-				if (this.array[i].Equals(player))
+				if (item.Equals(player))
 				{
 					idx = i;
 					return true;
 				}
+
+				i++;
 			}
 
 			idx = default;
@@ -90,7 +92,13 @@ namespace CardGames.Utilities
 		{
 			for (var i = 0; i < this.Current; i++)
 			{
-				yield return this.array[i];
+				var item = this.array[i];
+
+				// ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+				if (item is not null)
+				{
+					yield return item;
+				}
 			}
 		}
 

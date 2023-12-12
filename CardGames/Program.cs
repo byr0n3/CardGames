@@ -1,11 +1,16 @@
-using CardGames.Components;
+using CardGames.Frontend;
+using CardGames.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services
+	   .AddRazorComponents()
+	   .AddInteractiveServerComponents();
+
+builder.Services.AddSingleton<GameManager>();
 
 var app = builder.Build();
 
@@ -15,7 +20,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-	app.UseExceptionHandler("/Error", true);
+	app.UseExceptionHandler("/error", true);
 	app.UseHsts();
 }
 

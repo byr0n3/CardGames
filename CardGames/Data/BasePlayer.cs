@@ -1,16 +1,21 @@
+using CardGames.Utilities;
+
 namespace CardGames.Data
 {
 	public class BasePlayer : IPlayer<BasePlayer>, System.IEquatable<BasePlayer>
 	{
 		public int Key { get; }
 
-		public BasePlayer(int key)
+		public SpanContainer<char> Name { get; }
+
+		public BasePlayer(int key, SpanContainer<char> name)
 		{
 			this.Key = key;
+			this.Name = name;
 		}
 
-		public static BasePlayer Create(int key) =>
-			new(key);
+		public static BasePlayer Create(int key, System.ReadOnlySpan<char> name) =>
+			new(key, name);
 
 		public bool Equals(IPlayer<BasePlayer>? other) =>
 			other is not null && this.Key == other.Key;

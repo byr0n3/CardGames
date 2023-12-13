@@ -7,38 +7,42 @@ namespace CardGames.Frontend.Components
 	{
 		[Inject] public required GameManager GameManager { get; init; }
 
-		[Inject] public required NavigationManager NavigationManager { get; init; }
-
 		[Parameter] public required BaseGame<BasePlayer> Game { get; set; }
 
 		[Parameter] public required BasePlayer CurrentPlayer { get; set; }
 
+		[Parameter] public required System.Action OnLeaveGame { get; set; }
+
 		protected override void OnInitialized()
 		{
-			this.Game.OnPlayerJoined.Subscribe(this.Refresh);
-			this.Game.OnPlayerLeft.Subscribe(this.Refresh);
-			this.Game.OnGameDestroyed.Subscribe(this.OnGameDestroyed);
+			// Subscribe to the game lobby events
+			this.Game.OnPlayerJoined += this.Refresh;
+			this.Game.OnPlayerLeft += this.Refresh;
+			this.Game.OnGameDestroyed += this.OnGameDestroyed;
 		}
 
-		// @todo Await sync?
+		// @todo Await?
 		private void Refresh(BasePlayer _) =>
 			this.InvokeAsync(this.StateHasChanged);
 
-		// @todo Update UI instead of refresh
 		private void OnGameDestroyed() =>
-			this.NavigationManager.Refresh(true);
+			this.LeaveGame();
 
-		// @todo Update UI instead of refresh
-		private void LeaveGame() =>
-			this.NavigationManager.Refresh(true);
+		public void Dispose() =>
+			this.LeaveGame();
 
-		public void Dispose()
+		private void LeaveGame()
 		{
-			this.Game.OnPlayerJoined.Unsubscribe(this.Refresh);
-			this.Game.OnPlayerLeft.Unsubscribe(this.Refresh);
-			this.Game.OnGameDestroyed.Unsubscribe(this.OnGameDestroyed);
+			// Unsubscribe from the game lobby events
+			this.Game.OnPlayerJoined -= this.Refresh;
+			this.Game.OnPlayerLeft -= this.Refresh;
+			this.Game.OnGameDestroyed -= this.OnGameDestroyed;
 
+			// Signal the game that we're leaving
 			this.GameManager.Leave(this.Game, this.CurrentPlayer);
+
+			// Tell the parent component we left the game
+			this.OnLeaveGame.Invoke();
 		}
 	}
 }

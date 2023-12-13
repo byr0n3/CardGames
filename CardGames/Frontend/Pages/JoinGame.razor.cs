@@ -13,9 +13,21 @@ namespace CardGames.Frontend.Pages
 		private BaseGame<BasePlayer>? game;
 		private BasePlayer? player;
 
-		public void OnJoinGame()
+		private void OnJoinGame()
 		{
 			this.error = !this.GameManager.TryJoin(this.code, this.displayName, out this.game, out this.player);
+		}
+
+		private void OnLeaveGame()
+		{
+			this.code = "";
+			this.error = false;
+
+			this.game = null;
+			this.player = null;
+
+			// @todo Await?
+			_ = this.InvokeAsync(this.StateHasChanged);
 		}
 	}
 }

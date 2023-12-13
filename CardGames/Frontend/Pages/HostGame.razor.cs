@@ -12,9 +12,20 @@ namespace CardGames.Frontend.Pages
 		private BaseGame<BasePlayer>? game;
 		private BasePlayer? player;
 
-		public void OnHostGame()
+		private void OnHostGame()
 		{
 			this.error = !this.GameManager.TryHost(this.displayName, out this.game, out this.player);
+		}
+
+		private void OnLeaveGame()
+		{
+			this.error = false;
+
+			this.game = null;
+			this.player = null;
+
+			// @todo Await?
+			_ = this.InvokeAsync(this.StateHasChanged);
 		}
 	}
 }

@@ -28,6 +28,7 @@ namespace CardGames.Core.Utilities
 
 		public bool TryJoin(System.ReadOnlySpan<char> name, [NotNullWhen(true)] out TPlayer? player)
 		{
+			// Game is full
 			if (this.Current >= this.Max)
 			{
 				player = null;

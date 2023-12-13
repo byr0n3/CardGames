@@ -15,9 +15,9 @@ namespace CardGames.Frontend.Components
 
 		protected override void OnInitialized()
 		{
-			this.Game.OnPlayerJoined += this.Refresh;
-			this.Game.OnPlayerLeft += this.Refresh;
-			this.Game.OnGameDestroyed += this.OnGameDestroyed;
+			this.Game.OnPlayerJoined.Subscribe(this.Refresh);
+			this.Game.OnPlayerLeft.Subscribe(this.Refresh);
+			this.Game.OnGameDestroyed.Subscribe(this.OnGameDestroyed);
 		}
 
 		// @todo Await sync?
@@ -34,9 +34,9 @@ namespace CardGames.Frontend.Components
 
 		public void Dispose()
 		{
-			this.Game.OnPlayerJoined -= this.Refresh;
-			this.Game.OnPlayerLeft -= this.Refresh;
-			this.Game.OnGameDestroyed -= this.OnGameDestroyed;
+			this.Game.OnPlayerJoined.Unsubscribe(this.Refresh);
+			this.Game.OnPlayerLeft.Unsubscribe(this.Refresh);
+			this.Game.OnGameDestroyed.Unsubscribe(this.OnGameDestroyed);
 
 			this.GameManager.Leave(this.Game, this.CurrentPlayer);
 		}

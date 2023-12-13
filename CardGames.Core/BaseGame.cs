@@ -11,9 +11,9 @@ namespace CardGames.Core
 
 		public readonly PlayerList<TPlayer> Players;
 
-		public event System.Action<TPlayer>? OnPlayerJoined;
-		public event System.Action<TPlayer>? OnPlayerLeft;
-		public event System.Action? OnGameDestroyed;
+		public readonly Event<TPlayer> OnPlayerJoined;
+		public readonly Event<TPlayer> OnPlayerLeft;
+		public readonly Event OnGameDestroyed;
 
 		public TPlayer Host =>
 			this.Players[0];
@@ -25,6 +25,10 @@ namespace CardGames.Core
 			this.MinPlayers = minPlayers;
 
 			this.Players = new PlayerList<TPlayer>(maxPlayers);
+
+			this.OnPlayerJoined = new Event<TPlayer>();
+			this.OnPlayerLeft = new Event<TPlayer>();
+			this.OnGameDestroyed = new Event();
 		}
 
 		public bool TryJoin(System.ReadOnlySpan<char> name, [NotNullWhen(true)] out TPlayer? player)
@@ -34,7 +38,7 @@ namespace CardGames.Core
 				return false;
 			}
 
-			this.OnPlayerJoined?.Invoke(player);
+			this.OnPlayerJoined.Invoke(player);
 			return true;
 		}
 
@@ -45,13 +49,13 @@ namespace CardGames.Core
 				return false;
 			}
 
-			this.OnPlayerLeft?.Invoke(player);
+			this.OnPlayerLeft.Invoke(player);
 			return true;
 		}
 
 		public void Dispose()
 		{
-			this.OnGameDestroyed?.Invoke();
+			this.OnGameDestroyed.Invoke();
 
 			System.GC.SuppressFinalize(this);
 		}

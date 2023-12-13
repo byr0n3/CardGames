@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using CardGames.Extensions;
+using CardGames.Core;
+using CardGames.Core.Extensions;
+using CardGames.Core.Utilities;
 using Microsoft.Extensions.Logging;
 
-namespace CardGames.Data
+namespace CardGames
 {
 	public sealed class GameManager
 	{
@@ -35,21 +37,20 @@ namespace CardGames.Data
 			return game;
 		}
 
-		public bool TryJoin(string code,
+		public bool TryJoin(System.ReadOnlySpan<char> code,
 							System.ReadOnlySpan<char> name,
 							[NotNullWhen(true)] out BaseGame<BasePlayer>? game,
 							[NotNullWhen(true)] out BasePlayer? player)
 		{
 			foreach (var g in this.games)
 			{
-				if ((!string.Equals(g.Code, code, System.StringComparison.Ordinal)) ||
-					(!g.TryJoin(name, out player)))
+				if ((!g.Code.Equals(code)) || (!g.TryJoin(name, out player)))
 				{
 					continue;
 				}
 
 				this.logger.LogInformation("[{Code}] +{Name} ({Current}/{Max})",
-										   code,
+										   new string(code),
 										   new string(name),
 										   g.Players.Current,
 										   g.Players.Max);
@@ -88,15 +89,15 @@ namespace CardGames.Data
 		}
 
 		[System.Obsolete("Refactor")]
-		private string GenerateCode(int length)
+		private GameCode GenerateCode(int length)
 		{
 			const string map = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-			var result = "";
+			var result = new GameCode(length);
 
 			for (var i = 0; i < length; i++)
 			{
-				result += map[this.rnd.Next(0, map.Length)];
+				result.Append(map[this.rnd.Next(0, map.Length)]);
 			}
 
 			return result;

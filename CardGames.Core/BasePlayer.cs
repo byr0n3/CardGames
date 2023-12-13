@@ -1,6 +1,6 @@
-using CardGames.Utilities;
+using CardGames.Core.Utilities;
 
-namespace CardGames.Data
+namespace CardGames.Core
 {
 	public class BasePlayer : IPlayer<BasePlayer>, System.IEquatable<BasePlayer>
 	{

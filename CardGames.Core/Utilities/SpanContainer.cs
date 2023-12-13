@@ -1,8 +1,10 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 
-namespace CardGames.Utilities
+namespace CardGames.Core.Utilities
 {
+	[PublicAPI]
 	[StructLayout(LayoutKind.Sequential)]
 	public readonly unsafe struct SpanContainer<T> : System.IEquatable<SpanContainer<T>> where T : unmanaged
 	{

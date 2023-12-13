@@ -1,8 +1,7 @@
-@using CardGames.Data
-@using CardGames.Extensions
-@implements System.IDisposable
+@using CardGames.Core
+@using CardGames.Core.Extensions
 
-<h1>Game code: @(Game.Code)</h1>
+<h1>Game code: @(Game.Code.ToString())</h1>
 <p>Your name: @(CurrentPlayer.Name.Str())</p>
 
 <button type="button" class="btn btn-danger" @onclick="@(LeaveGame)">
@@ -18,42 +17,3 @@
 		}
 	}
 </ul>
-
-@code {
-
-	[Inject] public required GameManager GameManager { get; init; }
-
-	[Inject] public required NavigationManager NavigationManager { get; init; }
-
-	[Parameter] public required BaseGame<BasePlayer> Game { get; set; }
-
-	[Parameter] public required BasePlayer CurrentPlayer { get; set; }
-
-	protected override void OnInitialized()
-	{
-		Game.OnPlayerJoined += Refresh;
-		Game.OnPlayerLeft += Refresh;
-		Game.OnGameDestroyed += OnGameDestroyed;
-	}
-
-	private void Refresh(BasePlayer _) =>
-		InvokeAsync(StateHasChanged);
-
-	// @todo Update UI instead of refresh
-	private void OnGameDestroyed() =>
-		NavigationManager.Refresh(true);
-
-	// @todo Update UI instead of refresh
-	private void LeaveGame() =>
-		NavigationManager.Refresh(true);
-
-	public void Dispose()
-	{
-		Game.OnPlayerJoined -= Refresh;
-		Game.OnPlayerLeft -= Refresh;
-		Game.OnGameDestroyed -= OnGameDestroyed;
-
-		GameManager.Leave(Game, CurrentPlayer);
-	}
-
-}

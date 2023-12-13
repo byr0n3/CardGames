@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using CardGames.Data;
+using JetBrains.Annotations;
 
-namespace CardGames.Utilities
+namespace CardGames.Core.Utilities
 {
+	[PublicAPI]
 	public sealed class PlayerList<TPlayer> : IEnumerable<TPlayer> where TPlayer : class, IPlayer<TPlayer>
 	{
 		public int Max { get; }

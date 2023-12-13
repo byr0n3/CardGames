@@ -11,6 +11,7 @@
 		<DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
 		<EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
 		<EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
+		<IsPublishable>false</IsPublishable>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

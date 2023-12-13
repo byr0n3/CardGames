@@ -1,11 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
-using CardGames.Utilities;
+using CardGames.Core.Utilities;
 
-namespace CardGames.Data
+namespace CardGames.Core
 {
 	public class BaseGame<TPlayer> : IGame<TPlayer>, System.IDisposable where TPlayer : class, IPlayer<TPlayer>
 	{
-		public string Code { get; }
+		public GameCode Code { get; }
 
 		public int MinPlayers { get; }
 
@@ -18,7 +18,7 @@ namespace CardGames.Data
 		public TPlayer Host =>
 			this.Players[0];
 
-		public BaseGame(string code, int minPlayers, int maxPlayers)
+		public BaseGame(GameCode code, int minPlayers, int maxPlayers)
 		{
 			this.Code = code;
 

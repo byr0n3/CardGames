@@ -1,6 +1,6 @@
-using CardGames.Utilities;
+using CardGames.Core.Utilities;
 
-namespace CardGames.Data
+namespace CardGames.Core
 {
 	public interface IPlayer<out TSelf> where TSelf : IPlayer<TSelf>
 	{

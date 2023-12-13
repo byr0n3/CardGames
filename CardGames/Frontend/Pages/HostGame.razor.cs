@@ -1,4 +1,4 @@
-using CardGames.Data;
+using CardGames.Core;
 using Microsoft.AspNetCore.Components;
 
 namespace CardGames.Frontend.Pages

@@ -8,6 +8,13 @@
 {
 	<h1>Host Game</h1>
 
+	@if (error)
+	{
+		<div class="alert alert-danger" role="alert">
+			We couldn't host a game right now. Try again later.
+		</div>
+	}
+
 	<input @bind="@(displayName)" type="text" class="form-control" minlength="0" />
 
 	<button type="button" class="btn btn-primary" @onclick="@(OnHostGame)">

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using JetBrains.Annotations;
 
 namespace CardGames.Core.Utilities
@@ -8,64 +7,32 @@ namespace CardGames.Core.Utilities
 	{
 		public delegate void EventHandler();
 
-		private readonly List<EventHandler> listeners;
+		private EventHandler? callback;
 
-		public Event()
-		{
-			this.listeners = new List<EventHandler>();
-		}
-
-		public Event(params EventHandler[] listeners)
-		{
-			this.listeners = new List<EventHandler>(listeners.Length);
-			this.listeners.AddRange(listeners);
-		}
-
-		public void Invoke()
-		{
-			for (var i = this.listeners.Count - 1; i >= 0; i--)
-			{
-				this.listeners[i].Invoke();
-			}
-		}
+		public void Invoke() =>
+			this.callback?.Invoke();
 
 		public void Subscribe(EventHandler handler) =>
-			this.listeners.Add(handler);
+			this.callback += handler;
 
 		public void Unsubscribe(EventHandler handler) =>
-			this.listeners.Remove(handler);
+			this.callback -= handler;
 	}
 
 	[PublicAPI]
 	public sealed class Event<T>
 	{
-		public delegate void EventHandler(T var);
+		public delegate void EventHandler(T arg);
 
-		private readonly List<EventHandler> listeners;
+		private EventHandler? callback;
 
-		public Event()
-		{
-			this.listeners = new List<EventHandler>();
-		}
-
-		public Event(params EventHandler[] listeners)
-		{
-			this.listeners = new List<EventHandler>(listeners.Length);
-			this.listeners.AddRange(listeners);
-		}
-
-		public void Invoke(T var)
-		{
-			for (var i = this.listeners.Count - 1; i >= 0; i--)
-			{
-				this.listeners[i].Invoke(var);
-			}
-		}
+		public void Invoke(T arg) =>
+			this.callback?.Invoke(arg);
 
 		public void Subscribe(EventHandler handler) =>
-			this.listeners.Add(handler);
+			this.callback += handler;
 
 		public void Unsubscribe(EventHandler handler) =>
-			this.listeners.Remove(handler);
+			this.callback -= handler;
 	}
 }

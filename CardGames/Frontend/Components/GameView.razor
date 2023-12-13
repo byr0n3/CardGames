@@ -13,7 +13,7 @@
 	{
 		if (player.Key != CurrentPlayer.Key)
 		{
-			<li>@(player.Name.Str())</li>
+			<li @key="@(player.Key)">@(player.Name.Str())</li>
 		}
 	}
 </ul>

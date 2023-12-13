@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using CardGames.Core;
 using CardGames.Core.Extensions;
@@ -23,18 +22,29 @@ namespace CardGames
 			this.games = new List<BaseGame<BasePlayer>>(GameManager.prefillAmount);
 		}
 
-		public BaseGame<BasePlayer> Host(System.ReadOnlySpan<char> name, [NotNullWhen(true)] out BasePlayer? player)
+		public bool TryHost(System.ReadOnlySpan<char> name,
+							[NotNullWhen(true)] out BaseGame<BasePlayer>? game,
+							[NotNullWhen(true)] out BasePlayer? player)
 		{
-			// @todo Make sure code isn't in active games already
-			var game = new BaseGame<BasePlayer>(this.GenerateCode(4), 2, 8);
+			if (!this.TryGenerateUniqueCode(4, out var code))
+			{
+				game = null;
+				player = null;
+				return false;
+			}
+
+			game = new BaseGame<BasePlayer>(code, 2, 8);
+
+			if (!game.TryJoin(name, out player))
+			{
+				return false;
+			}
 
 			this.games.Add(game);
 
-			Debug.Assert(game.TryJoin(name, out player));
-
 			this.logger.LogInformation("[{Code}] Game created", game.Code);
 
-			return game;
+			return true;
 		}
 
 		public bool TryJoin(System.ReadOnlySpan<char> code,
@@ -89,18 +99,35 @@ namespace CardGames
 		}
 
 		[System.Obsolete("Refactor")]
-		private GameCode GenerateCode(int length)
+		private bool TryGenerateUniqueCode(int length, out GameCode result)
+		{
+			const int maxTries = 10;
+
+			var tries = 0;
+			var temp = new GameCode(length);
+			this.FillCode(ref temp, length);
+
+			while (this.games.Exists((game) => game.Code == temp) && tries <= maxTries)
+			{
+				temp.Reset();
+				this.FillCode(ref temp, length);
+
+				tries++;
+			}
+
+			result = temp;
+			return tries <= maxTries;
+		}
+
+		[System.Obsolete("Refactor")]
+		private void FillCode(ref GameCode code, int length)
 		{
 			const string map = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-			var result = new GameCode(length);
-
 			for (var i = 0; i < length; i++)
 			{
-				result.Append(map[this.rnd.Next(0, map.Length)]);
+				code.Append(map[this.rnd.Next(0, map.Length)]);
 			}
-
-			return result;
 		}
 	}
 }

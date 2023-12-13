@@ -24,6 +24,9 @@ namespace CardGames.Core.Utilities
 			this.data[this.position++] = @char;
 		}
 
+		public void Reset() =>
+			this.position = 0;
+
 		public readonly System.ReadOnlySpan<char> AsSpan(int length = 0)
 		{
 			if (length <= 0 || length > this.position)

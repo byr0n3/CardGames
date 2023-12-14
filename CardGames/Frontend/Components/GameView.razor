@@ -1,19 +1,36 @@
 @using CardGames.Core
 @using CardGames.Core.Extensions
+@using CardGames.Extensions
 
-<h1>Game code: @(Game.Code.ToString())</h1>
-<p>Your name: @(CurrentPlayer.Name.Str())</p>
+@if (Game.State == GameState.Lobby)
+{
+	<h1>Game code: @(Game.Code.ToString())</h1>
+	<p>Your name: @(CurrentPlayer.Name.Str())</p>
 
-<button type="button" class="btn btn-danger" @onclick="@(LeaveGame)">
-	Leave
-</button>
-
-<ul role="list">
-	@foreach (var player in Game.Players)
-	{
-		if (player.Key != CurrentPlayer.Key)
+	<ul role="list">
+		@foreach (var player in Game.Players)
 		{
-			<li @key="@(player.Key)">@(player.Name.Str())</li>
+			if (player.Key != CurrentPlayer.Key)
+			{
+				<li @key="@(player.Key.Str())">@(player.Name.Str())</li>
+			}
 		}
-	}
-</ul>
+	</ul>
+
+	<div class="mt-3 d-flex flex-row flex-nowrap gap-3">
+		<button type="button" class="btn btn-danger" @onclick="@(LeaveGame)">
+			Leave
+		</button>
+
+		@if ((Game.Host == CurrentPlayer) && Game.CanStart)
+		{
+			<button type="button" class="btn btn-danger" @onclick="@(StartGame)">
+				Start (@(Game.Players.Current.Str())/@(Game.Players.Max.Str())
+			</button>
+		}
+	</div>
+}
+else if (Game.State == GameState.InProgress)
+{
+	<p>Game in progress!</p>
+}

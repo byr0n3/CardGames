@@ -18,11 +18,16 @@ namespace CardGames.Frontend.Components
 			// Subscribe to the game lobby events
 			this.Game.OnPlayerJoined += this.Refresh;
 			this.Game.OnPlayerLeft += this.Refresh;
+			this.Game.OnGameStart += this.Refresh;
 			this.Game.OnGameDestroyed += this.OnGameDestroyed;
 		}
 
 		// @todo Await?
 		private void Refresh(BasePlayer _) =>
+			this.InvokeAsync(this.StateHasChanged);
+
+		// @todo Await?
+		private void Refresh() =>
 			this.InvokeAsync(this.StateHasChanged);
 
 		private void OnGameDestroyed() =>
@@ -36,6 +41,7 @@ namespace CardGames.Frontend.Components
 			// Unsubscribe from the game lobby events
 			this.Game.OnPlayerJoined -= this.Refresh;
 			this.Game.OnPlayerLeft -= this.Refresh;
+			this.Game.OnGameStart -= this.Refresh;
 			this.Game.OnGameDestroyed -= this.OnGameDestroyed;
 
 			// Signal the game that we're leaving
@@ -44,5 +50,8 @@ namespace CardGames.Frontend.Components
 			// Tell the parent component we left the game
 			this.OnLeaveGame.Invoke();
 		}
+
+		private void StartGame() =>
+			this.GameManager.TryStart(this.Game, this.CurrentPlayer);
 	}
 }

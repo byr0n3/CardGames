@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using CardGames.Core;
 using CardGames.Core.Extensions;
 using CardGames.Core.Utilities;
+using CardGames.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace CardGames
@@ -42,7 +43,7 @@ namespace CardGames
 
 			this.games.Add(game);
 
-			this.logger.LogInformation("[{Code}] Game created", game.Code);
+			this.logger.LogInformation("[{Code}] Game created", game.Code.ToString());
 
 			return true;
 		}
@@ -59,13 +60,14 @@ namespace CardGames
 					continue;
 				}
 
-				this.logger.LogInformation("[{Code}] +{Name} ({Current}/{Max})",
-										   new string(code),
-										   new string(name),
-										   g.Players.Current,
-										   g.Players.Max);
-
 				game = g;
+
+				this.logger.LogInformation("[{Code}] +{Name} ({Current}/{Max})",
+										   game.Code.ToString(),
+										   player.Name.Str(),
+										   g.Players.Current.Str(),
+										   g.Players.Max.Str());
+
 				return true;
 			}
 
@@ -82,20 +84,32 @@ namespace CardGames
 			}
 
 			this.logger.LogInformation("[{Code}] -{Name} ({Current}/{Max})",
-									   game.Code,
+									   game.Code.ToString(),
 									   player.Name.Str(),
-									   game.Players.Current,
-									   game.Players.Max);
+									   game.Players.Current.Str(),
+									   game.Players.Max.Str());
 
 			if (!wasHost && (game.Players.Current > 0))
 			{
 				return;
 			}
 
-			this.logger.LogInformation("[{Code}] Game is empty, cleaning up!", game.Code);
+			this.logger.LogInformation("[{Code}] Game is empty, cleaning up!", game.Code.ToString());
 
 			this.games.Remove(game);
 			game.Dispose();
+		}
+
+		public bool TryStart(BaseGame<BasePlayer> game, BasePlayer player)
+		{
+			if (!game.TryStart(player))
+			{
+				return false;
+			}
+
+			this.logger.LogInformation("[{Code}] Game has started", game.Code.ToString());
+
+			return true;
 		}
 
 		[System.Obsolete("Refactor")]

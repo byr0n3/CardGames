@@ -28,5 +28,11 @@ namespace CardGames.Core
 
 		public override int GetHashCode() =>
 			this.Key;
+
+		public static bool operator ==(BasePlayer left, BasePlayer right) =>
+			left.Equals(right);
+
+		public static bool operator !=(BasePlayer left, BasePlayer right) =>
+			!left.Equals(right);
 	}
 }

@@ -3,13 +3,15 @@ using Microsoft.AspNetCore.Components;
 
 namespace CardGames.Frontend.Components
 {
-	public sealed partial class GameView : ComponentBase, System.IDisposable
+	public sealed partial class GameView<TGame, TPlayer> : ComponentBase, System.IDisposable
+		where TGame : BaseGame<TPlayer>, IGame<TGame, TPlayer>
+		where TPlayer : BasePlayer, IPlayer<TPlayer>
 	{
-		[Inject] public required GameManager GameManager { get; init; }
+		[Inject] public required GameManager<TGame, TPlayer> GameManager { get; init; }
 
-		[Parameter] public required BaseGame<BasePlayer> Game { get; set; }
+		[Parameter] public required TGame Game { get; set; }
 
-		[Parameter] public required BasePlayer CurrentPlayer { get; set; }
+		[Parameter] public required TPlayer CurrentPlayer { get; set; }
 
 		[Parameter] public required System.Action OnLeaveGame { get; set; }
 

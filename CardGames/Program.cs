@@ -1,4 +1,5 @@
 using CardGames;
+using CardGames.Core.Uno;
 using CardGames.Frontend;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,7 @@ builder.Services
 	   .AddRazorComponents()
 	   .AddInteractiveServerComponents();
 
-builder.Services.AddSingleton<GameManager>();
+builder.Services.AddSingleton<GameManager<UnoGame, UnoPlayer>>();
 
 var app = builder.Build();
 

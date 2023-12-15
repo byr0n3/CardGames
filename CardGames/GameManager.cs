@@ -8,24 +8,26 @@ using Microsoft.Extensions.Logging;
 
 namespace CardGames
 {
-	public sealed class GameManager
+	public sealed class GameManager<TGame, TPlayer> where TGame : BaseGame<TPlayer>, IGame<TGame, TPlayer>
+													where TPlayer : BasePlayer, IPlayer<TPlayer>
 	{
 		private const int prefillAmount = 2;
 
 		private readonly System.Random rnd;
-		private readonly ILogger<GameManager> logger;
-		private readonly List<BaseGame<BasePlayer>> games;
+		private readonly ILogger<GameManager<TGame, TPlayer>> logger;
+		private readonly List<TGame> games;
 
-		public GameManager(ILogger<GameManager> logger)
+		public GameManager(ILogger<GameManager<TGame, TPlayer>> logger)
 		{
 			this.logger = logger;
 			this.rnd = new System.Random();
-			this.games = new List<BaseGame<BasePlayer>>(GameManager.prefillAmount);
+			this.games = new List<TGame>(GameManager<TGame, TPlayer>.prefillAmount);
 		}
 
 		public bool TryHost(System.ReadOnlySpan<char> name,
-							[NotNullWhen(true)] out BaseGame<BasePlayer>? game,
-							[NotNullWhen(true)] out BasePlayer? player)
+							[NotNullWhen(true)] out TGame? game,
+							[NotNullWhen(true)] out TPlayer? player)
+
 		{
 			if (!this.TryGenerateUniqueCode(4, out var code))
 			{
@@ -34,24 +36,25 @@ namespace CardGames
 				return false;
 			}
 
-			game = new BaseGame<BasePlayer>(code, 2, 8);
+			game = TGame.Create(code, 2, 8);
 
 			if (!game.TryJoin(name, out player))
 			{
+				game = null;
 				return false;
 			}
 
 			this.games.Add(game);
 
-			this.logger.LogInformation("[{Code}] Game created", game.Code.ToString());
+			this.logger.LogInformation("[{Code}] {Game} created", game.Code.ToString(), typeof(TGame).Name);
 
 			return true;
 		}
 
 		public bool TryJoin(System.ReadOnlySpan<char> code,
 							System.ReadOnlySpan<char> name,
-							[NotNullWhen(true)] out BaseGame<BasePlayer>? game,
-							[NotNullWhen(true)] out BasePlayer? player)
+							[NotNullWhen(true)] out TGame? game,
+							[NotNullWhen(true)] out TPlayer? player)
 		{
 			foreach (var g in this.games)
 			{
@@ -76,7 +79,7 @@ namespace CardGames
 			return false;
 		}
 
-		public void Leave(BaseGame<BasePlayer> game, BasePlayer player)
+		public void Leave(TGame game, TPlayer player)
 		{
 			if (!game.TryLeave(player, out var wasHost))
 			{
@@ -100,7 +103,7 @@ namespace CardGames
 			game.Dispose();
 		}
 
-		public bool TryStart(BaseGame<BasePlayer> game, BasePlayer player)
+		public bool TryStart(TGame game, TPlayer player)
 		{
 			if (!game.TryStart(player))
 			{

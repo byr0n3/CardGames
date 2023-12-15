@@ -3,7 +3,8 @@ using CardGames.Core.Utilities;
 
 namespace CardGames.Core
 {
-	public class BaseGame<TPlayer> : IGame<TPlayer>, System.IDisposable where TPlayer : class, IPlayer<TPlayer>
+	public class BaseGame<TPlayer> : IGame<BaseGame<TPlayer>, TPlayer>, System.IDisposable
+		where TPlayer : BasePlayer, IPlayer<TPlayer>
 	{
 		public delegate void VoidEvent();
 
@@ -82,5 +83,8 @@ namespace CardGames.Core
 
 			System.GC.SuppressFinalize(this);
 		}
+
+		public static BaseGame<TPlayer> Create(GameCode code, int minPlayers, int maxPlayers) =>
+			new(code, minPlayers, maxPlayers);
 	}
 }

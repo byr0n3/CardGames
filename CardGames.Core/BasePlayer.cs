@@ -18,7 +18,7 @@ namespace CardGames.Core
 			new(key, name);
 
 		public bool Equals(IPlayer<BasePlayer>? other) =>
-			other is not null && this.Key == other.Key;
+			other is not null && (this.Key == other.Key);
 
 		public bool Equals(BasePlayer? other) =>
 			this.Equals((IPlayer<BasePlayer>?)other);

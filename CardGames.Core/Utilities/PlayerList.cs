@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 namespace CardGames.Core.Utilities
 {
 	[PublicAPI]
-	public sealed class PlayerList<TPlayer> : IEnumerable<TPlayer> where TPlayer : class, IPlayer<TPlayer>
+	public sealed class PlayerList<TPlayer> : IEnumerable<TPlayer> where TPlayer : BasePlayer, IPlayer<TPlayer>
 	{
 		public int Max { get; }
 		public int Current { get; private set; }

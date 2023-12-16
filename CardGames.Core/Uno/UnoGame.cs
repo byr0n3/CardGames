@@ -8,6 +8,10 @@ namespace CardGames.Core.Uno
 		{
 		}
 
+		protected override void OnGameStarted()
+		{
+		}
+
 		public static UnoGame Create(GameCode code, int minPlayers, int maxPlayers) =>
 			new(code, minPlayers, maxPlayers);
 	}

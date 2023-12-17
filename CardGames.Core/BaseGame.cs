@@ -71,9 +71,9 @@ namespace CardGames.Core
 
 			this.State = GameState.InProgress;
 
-			this.OnGameStart?.Invoke();
-
 			this.OnGameStarted();
+
+			this.OnGameStart?.Invoke();
 
 			return true;
 		}

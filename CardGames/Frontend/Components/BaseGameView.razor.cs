@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace CardGames.Frontend.Components
 {
-	public sealed partial class GameView<TGame, TPlayer> : ComponentBase, System.IDisposable
+	public sealed partial class BaseGameView<TGame, TPlayer> : ComponentBase, System.IDisposable
 		where TGame : BaseGame<TPlayer>, IGame<TGame, TPlayer>
 		where TPlayer : BasePlayer, IPlayer<TPlayer>
 	{
@@ -15,6 +15,8 @@ namespace CardGames.Frontend.Components
 
 		[Parameter] public required System.Action OnLeaveGame { get; set; }
 
+		[Parameter] public required RenderFragment ChildContent { get; set; }
+
 		protected override void OnInitialized()
 		{
 			// Subscribe to the game lobby events
@@ -25,18 +27,21 @@ namespace CardGames.Frontend.Components
 		}
 
 		// @todo Await?
-		private void Refresh(BasePlayer _) =>
-			this.InvokeAsync(this.StateHasChanged);
+		private void Refresh(BasePlayer __) =>
+			_ = this.InvokeAsync(this.StateHasChanged);
 
 		// @todo Await?
 		private void Refresh() =>
-			this.InvokeAsync(this.StateHasChanged);
+			_ = this.InvokeAsync(this.StateHasChanged);
 
 		private void OnGameDestroyed() =>
 			this.LeaveGame();
 
 		public void Dispose() =>
 			this.LeaveGame();
+
+		private void StartGame() =>
+			this.GameManager.TryStart(this.Game, this.CurrentPlayer);
 
 		private void LeaveGame()
 		{
@@ -52,8 +57,5 @@ namespace CardGames.Frontend.Components
 			// Tell the parent component we left the game
 			this.OnLeaveGame.Invoke();
 		}
-
-		private void StartGame() =>
-			this.GameManager.TryStart(this.Game, this.CurrentPlayer);
 	}
 }

@@ -1,0 +1,15 @@
+<BaseGameView Game="@(Game)" CurrentPlayer="@(CurrentPlayer)" OnLeaveGame="@(OnLeaveGame)">
+	@{ var cardEnumerator = CurrentPlayer.CardsEnumerator(); }
+
+	<div class="d-flex flex-row flex-nowrap align-items-center gap-3">
+		@while (cardEnumerator.MoveNext())
+		{
+			var card = cardEnumerator.Current;
+
+			<div>
+				<p>Color: @(card.Color.ToString())</p>
+				<p>Value: @(card.Value.ToString())</p>
+			</div>
+		}
+	</div>
+</BaseGameView>

@@ -20,15 +20,9 @@ namespace CardGames.Frontend.Components
 		protected override void OnInitialized()
 		{
 			// Subscribe to the game lobby events
-			this.Game.OnPlayerJoined += this.Refresh;
-			this.Game.OnPlayerLeft += this.Refresh;
-			this.Game.OnGameStart += this.Refresh;
+			this.Game.OnLobbyStateChanged += this.Refresh;
 			this.Game.OnGameDestroyed += this.OnGameDestroyed;
 		}
-
-		// @todo Await?
-		private void Refresh(BasePlayer __) =>
-			_ = this.InvokeAsync(this.StateHasChanged);
 
 		// @todo Await?
 		private void Refresh() =>
@@ -46,9 +40,7 @@ namespace CardGames.Frontend.Components
 		private void LeaveGame()
 		{
 			// Unsubscribe from the game lobby events
-			this.Game.OnPlayerJoined -= this.Refresh;
-			this.Game.OnPlayerLeft -= this.Refresh;
-			this.Game.OnGameStart -= this.Refresh;
+			this.Game.OnLobbyStateChanged -= this.Refresh;
 			this.Game.OnGameDestroyed -= this.OnGameDestroyed;
 
 			// Signal the game that we're leaving

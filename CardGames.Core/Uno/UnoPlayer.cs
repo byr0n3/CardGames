@@ -7,6 +7,9 @@ namespace CardGames.Core.Uno
 	{
 		private readonly List<Card> hand;
 
+		public int CardCount =>
+			this.hand.Count;
+
 		private UnoPlayer(int key, SpanContainer<char> name) : base(key, name)
 		{
 			this.hand = new List<Card>(UnoGame.StartingCardCount);
@@ -14,6 +17,12 @@ namespace CardGames.Core.Uno
 
 		internal void AddCard(Card card) =>
 			this.hand.Add(card);
+
+		internal void RemoveCard(Card card) =>
+			this.hand.Remove(card);
+
+		internal bool HasCard(Card card) =>
+			this.hand.Contains(card);
 
 		public List<Card>.Enumerator CardsEnumerator() =>
 			this.hand.GetEnumerator();

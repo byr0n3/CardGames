@@ -1,15 +1,36 @@
+@using CardGames.Extensions
+@using CardGames.Core.Extensions
+@using CardGames.Frontend.Components.Uno
+
 <BaseGameView Game="@(Game)" CurrentPlayer="@(CurrentPlayer)" OnLeaveGame="@(OnLeaveGame)">
 	@{ var cardEnumerator = CurrentPlayer.CardsEnumerator(); }
+
+	<div>
+		<UnoCard Card="@(Game.TopCard)" />
+
+		<button type="button" class="btn btn-primary" @onclick="@(DrawCard)">
+			Draw
+		</button>
+	</div>
 
 	<div class="d-flex flex-row flex-nowrap align-items-center gap-3">
 		@while (cardEnumerator.MoveNext())
 		{
 			var card = cardEnumerator.Current;
 
-			<div>
-				<p>Color: @(card.Color.ToString())</p>
-				<p>Value: @(card.Value.ToString())</p>
-			</div>
+			<UnoCard Card="@(card)" OnCardClick="@(PlayCard)" />
 		}
 	</div>
+
+	@foreach (var player in Game.Players)
+	{
+		if (player == CurrentPlayer)
+		{
+			continue;
+		}
+
+		<div class="d-flex flex-row flex-nowrap align-items-center gap-3">
+			@(player.Name.Str()) has @(player.CardCount.Str()) card(s).
+		</div>
+	}
 </BaseGameView>

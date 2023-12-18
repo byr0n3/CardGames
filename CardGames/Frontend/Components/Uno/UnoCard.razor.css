@@ -1,0 +1,5 @@
+.uno-card {
+    border: 1px solid black;
+    padding: var(--spacing);
+    border-radius: var(--border-radius);
+}

@@ -1,7 +1,9 @@
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 
 namespace CardGames.Core.Uno
 {
+	[PublicAPI]
 	[StructLayout(LayoutKind.Sequential)]
 	public readonly struct Card : System.IEquatable<Card>
 	{
@@ -11,14 +13,14 @@ namespace CardGames.Core.Uno
 		public bool IsDefault =>
 			this.Color == CardColor.None || this.Value == CardValue.None;
 
-		public Card(CardColor color, CardValue value)
+		internal Card(CardColor color, CardValue value)
 		{
 			this.Color = color;
 			this.Value = value;
 		}
 
 		public bool Equals(Card other) =>
-			this.Color == other.Color && this.Value == other.Value;
+			(this.Color == other.Color) && (this.Value == other.Value);
 
 		public override bool Equals(object? @object) =>
 			@object is Card other && this.Equals(other);

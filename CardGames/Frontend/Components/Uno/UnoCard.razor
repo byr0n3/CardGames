@@ -1,0 +1,17 @@
+@using CardGames.Core.Uno
+
+<div class="uno-card" @onclick="@(OnClick)">
+	<p>Color: @(Card.Color.ToString())</p>
+	<p>Value: @(Card.Value.ToString())</p>
+</div>
+
+@code {
+
+	[Parameter] public required Card Card { get; set; }
+
+	[Parameter] public System.Action<Card>? OnCardClick { get; set; }
+
+	private void OnClick() =>
+		OnCardClick?.Invoke(Card);
+
+}

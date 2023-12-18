@@ -5,7 +5,6 @@ namespace CardGames.Core.Uno
 	internal sealed class CardDeck
 	{
 		private const int deckSize = 92;
-		private const int wildCards = 2;
 
 		private static readonly CardColor[] cardColors = System.Enum.GetValues<CardColor>();
 		private static readonly CardValue[] cardValues = System.Enum.GetValues<CardValue>();
@@ -29,6 +28,11 @@ namespace CardGames.Core.Uno
 
 		public Card Draw()
 		{
+			if (this.cards.Count == 0)
+			{
+				return default;
+			}
+
 			var card = this.cards[0];
 
 			this.cards.RemoveAt(0);
@@ -65,11 +69,14 @@ namespace CardGames.Core.Uno
 		{
 			if (color is CardColor.Wild)
 			{
-				for (var i = 0; i < CardDeck.wildCards; i++)
-				{
-					cards.Add(new Card(color, CardValue.Wild));
-					cards.Add(new Card(color, CardValue.DrawFour));
-				}
+				// Add each wild card twice
+
+				cards.Add(new Card(color, CardValue.Wild));
+				cards.Add(new Card(color, CardValue.Wild));
+				cards.Add(new Card(color, CardValue.DrawFour));
+				cards.Add(new Card(color, CardValue.DrawFour));
+
+				return;
 			}
 
 			CardDeck.AddValueCards(cards, color);

@@ -77,7 +77,7 @@ namespace CardGames.Core.Utilities
 
 			foreach (var item in this)
 			{
-				if (item.Equals(player))
+				if (item == player)
 				{
 					idx = i;
 					return true;

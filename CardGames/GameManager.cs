@@ -100,7 +100,7 @@ namespace CardGames
 			this.logger.LogInformation("[{Code}] Game is empty, cleaning up!", game.Code.ToString());
 
 			this.games.Remove(game);
-			game.Dispose();
+			game.EndGame();
 		}
 
 		public bool TryStart(TGame game, TPlayer player)

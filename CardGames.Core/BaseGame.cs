@@ -3,11 +3,9 @@ using CardGames.Core.Utilities;
 
 namespace CardGames.Core
 {
-	public abstract class BaseGame<TPlayer> : System.IDisposable where TPlayer : BasePlayer, IPlayer<TPlayer>
+	public abstract class BaseGame<TPlayer> where TPlayer : BasePlayer, IPlayer<TPlayer>
 	{
 		public delegate void VoidEvent();
-
-		public delegate void PlayerEvent(TPlayer player);
 
 		public GameCode Code { get; }
 
@@ -17,10 +15,8 @@ namespace CardGames.Core
 
 		public readonly PlayerList<TPlayer> Players;
 
-		public event PlayerEvent? OnPlayerJoined;
-		public event PlayerEvent? OnPlayerLeft;
+		public event VoidEvent? OnLobbyStateChanged;
 		public event VoidEvent? OnGameDestroyed;
-		public event VoidEvent? OnGameStart;
 
 		public TPlayer Host =>
 			this.Players[0];
@@ -28,7 +24,7 @@ namespace CardGames.Core
 		public bool CanStart =>
 			this.Players.Current >= this.MinPlayers;
 
-		public BaseGame(GameCode code, int minPlayers, int maxPlayers)
+		protected BaseGame(GameCode code, int minPlayers, int maxPlayers)
 		{
 			this.Code = code;
 
@@ -46,7 +42,10 @@ namespace CardGames.Core
 				return false;
 			}
 
-			this.OnPlayerJoined?.Invoke(player);
+			this.OnPlayerJoined(player);
+
+			this.OnLobbyStateChanged?.Invoke();
+
 			return true;
 		}
 
@@ -57,7 +56,10 @@ namespace CardGames.Core
 				return false;
 			}
 
-			this.OnPlayerLeft?.Invoke(player);
+			this.OnPlayerLeft(player);
+
+			this.OnLobbyStateChanged?.Invoke();
+
 			return true;
 		}
 
@@ -73,18 +75,26 @@ namespace CardGames.Core
 
 			this.OnGameStarted();
 
-			this.OnGameStart?.Invoke();
+			this.OnLobbyStateChanged?.Invoke();
 
 			return true;
 		}
 
-		public void Dispose()
+		public void EndGame()
 		{
 			this.OnGameDestroyed?.Invoke();
-
-			System.GC.SuppressFinalize(this);
 		}
 
-		protected abstract void OnGameStarted();
+		protected virtual void OnGameStarted()
+		{
+		}
+
+		protected virtual void OnPlayerJoined(TPlayer player)
+		{
+		}
+
+		protected virtual void OnPlayerLeft(TPlayer player)
+		{
+		}
 	}
 }

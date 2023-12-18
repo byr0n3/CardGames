@@ -8,7 +8,7 @@ namespace CardGames.Core
 
 		public SpanContainer<char> Name { get; }
 
-		public BasePlayer(int key, SpanContainer<char> name)
+		protected BasePlayer(int key, SpanContainer<char> name)
 		{
 			this.Key = key;
 			this.Name = name;
@@ -17,22 +17,19 @@ namespace CardGames.Core
 		public static BasePlayer Create(int key, System.ReadOnlySpan<char> name) =>
 			new(key, name);
 
-		public bool Equals(IPlayer<BasePlayer>? other) =>
+		public bool Equals(BasePlayer? other) =>
 			other is not null && (this.Key == other.Key);
 
-		public bool Equals(BasePlayer? other) =>
-			this.Equals((IPlayer<BasePlayer>?)other);
-
 		public override bool Equals(object? @object) =>
-			@object is IPlayer<BasePlayer> player && this.Equals(player);
+			@object is BasePlayer player && this.Equals(player);
 
 		public override int GetHashCode() =>
 			this.Key;
 
-		public static bool operator ==(BasePlayer left, BasePlayer right) =>
-			left.Equals(right);
+		public static bool operator ==(BasePlayer? left, BasePlayer? right) =>
+			left?.Equals(right) == true;
 
-		public static bool operator !=(BasePlayer left, BasePlayer right) =>
-			!left.Equals(right);
+		public static bool operator !=(BasePlayer? left, BasePlayer? right) =>
+			left?.Equals(right) == false;
 	}
 }

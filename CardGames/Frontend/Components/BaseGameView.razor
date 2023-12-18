@@ -27,12 +27,25 @@
 		@if ((Game.Host == CurrentPlayer) && Game.CanStart)
 		{
 			<button type="button" class="btn btn-danger" @onclick="@(StartGame)">
-				Start (@(Game.Players.Current.Str())/@(Game.Players.Max.Str())
+				Start (@(Game.Players.Length.Str())/@(Game.Players.Capacity.Str())
 			</button>
 		}
 	</div>
 }
-else if (Game.State == GameState.InProgress)
+else
 {
 	@(ChildContent)
+
+	@if (Game.State == GameState.Finished)
+	{
+		var winner = Game.Players[Game.CurrentPlayerIndex] ?? CurrentPlayer;
+
+		<div class="position-absolute top-0 start-0 bottom-0 end-0 bg-black bg-opacity-50" style="z-index: 1000;">
+			<h1 class="text-white">@(winner == CurrentPlayer ? "You won" : winner.Name.Str() + " won")</h1>
+
+			<button type="button" class="btn btn-primary" @onclick="@(OnLeaveGame)">
+				Leave
+			</button>
+		</div>
+	}
 }

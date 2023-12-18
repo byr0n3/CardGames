@@ -8,28 +8,27 @@ namespace CardGames.Core.Utilities
 	[PublicAPI]
 	public sealed class PlayerList<TPlayer> : IEnumerable<TPlayer> where TPlayer : BasePlayer, IPlayer<TPlayer>
 	{
-		public int Max { get; }
-		public int Current { get; private set; }
+		public int Capacity { get; }
+		public int Length { get; private set; }
 
-		private readonly TPlayer[] array;
+		private readonly TPlayer?[] array;
 
 		private int nextIdx;
 
-		public TPlayer this[int index] =>
+		public TPlayer? this[int index] =>
 			this.array[index];
 
-		public PlayerList(int max)
+		public PlayerList(int capacity)
 		{
-			this.Max = max;
-			this.Current = 0;
+			this.Capacity = capacity;
+			this.Length = 0;
 
-			this.array = new TPlayer[this.Max];
+			this.array = new TPlayer[this.Capacity];
 		}
 
 		public bool TryJoin(System.ReadOnlySpan<char> name, [NotNullWhen(true)] out TPlayer? player)
 		{
-			// Game is full
-			if (this.Current >= this.Max)
+			if (this.Length >= this.Capacity)
 			{
 				player = null;
 				return false;
@@ -37,41 +36,43 @@ namespace CardGames.Core.Utilities
 
 			player = TPlayer.Create(this.nextIdx++, name);
 
-			this.array[this.Current++] = player;
+			this.array[this.Length++] = player;
 			return true;
 		}
 
 		public bool TryLeave(TPlayer player, out bool wasHost)
 		{
-			if (!this.GetPlayerIndex(player, out var idx))
+			var idx = this.GetIndex(player);
+
+			if (idx == -1)
 			{
 				wasHost = false;
 				return false;
 			}
 
 			// Player we want to remove is at the start or at the end, just set it to null
-			if ((idx == 0) || (idx == this.Current - 1))
+			if ((idx == 0) || (idx == this.Length - 1))
 			{
 				this.array[idx] = null;
-				this.Current--;
+				this.Length--;
 
 				wasHost = (idx == 0);
 				return true;
 			}
 
 			// Move every element after the one we want to remove one element to the left
-			for (var i = idx; i < this.Current; i++)
+			for (var i = idx; i < this.Length; i++)
 			{
 				this.array[i] = this.array[i + 1];
 			}
 
-			this.Current--;
+			this.Length--;
 
 			wasHost = false;
 			return true;
 		}
 
-		private bool GetPlayerIndex(TPlayer player, out int idx)
+		public int GetIndex(TPlayer player)
 		{
 			var i = 0;
 
@@ -79,20 +80,18 @@ namespace CardGames.Core.Utilities
 			{
 				if (item == player)
 				{
-					idx = i;
-					return true;
+					return i;
 				}
 
 				i++;
 			}
 
-			idx = default;
-			return false;
+			return -1;
 		}
 
 		public IEnumerator<TPlayer> GetEnumerator()
 		{
-			for (var i = 0; i < this.Current; i++)
+			for (var i = 0; i < this.Length; i++)
 			{
 				var item = this.array[i];
 

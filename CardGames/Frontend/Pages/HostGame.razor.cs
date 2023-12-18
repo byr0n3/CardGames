@@ -7,7 +7,7 @@ namespace CardGames.Frontend.Pages
 	{
 		[Inject] public required GameManager<UnoGame, UnoPlayer> GameManager { get; init; }
 
-		private string displayName = "Player";
+		private string displayName = "Host";
 		private bool error;
 		private UnoGame? game;
 		private UnoPlayer? player;

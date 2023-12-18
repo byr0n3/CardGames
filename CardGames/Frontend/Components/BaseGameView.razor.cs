@@ -19,7 +19,6 @@ namespace CardGames.Frontend.Components
 
 		protected override void OnInitialized()
 		{
-			// Subscribe to the game lobby events
 			this.Game.OnLobbyStateChanged += this.Refresh;
 			this.Game.OnGameDestroyed += this.OnGameDestroyed;
 		}
@@ -39,14 +38,11 @@ namespace CardGames.Frontend.Components
 
 		private void LeaveGame()
 		{
-			// Unsubscribe from the game lobby events
 			this.Game.OnLobbyStateChanged -= this.Refresh;
 			this.Game.OnGameDestroyed -= this.OnGameDestroyed;
 
-			// Signal the game that we're leaving
 			this.GameManager.Leave(this.Game, this.CurrentPlayer);
 
-			// Tell the parent component we left the game
 			this.OnLeaveGame.Invoke();
 		}
 	}

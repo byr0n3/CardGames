@@ -13,16 +13,20 @@ namespace CardGames.Core
 
 		public GameState State { get; private set; }
 
+		public int CurrentPlayerIndex { get; private set; }
+
 		public readonly PlayerList<TPlayer> Players;
 
 		public event VoidEvent? OnLobbyStateChanged;
 		public event VoidEvent? OnGameDestroyed;
 
+		// We can assume the player isn't null here,
+		// the game would've been deleted if so.
 		public TPlayer Host =>
-			this.Players[0];
+			this.Players[0]!;
 
 		public bool CanStart =>
-			this.Players.Current >= this.MinPlayers;
+			(this.State == GameState.Lobby) && (this.Players.Length >= this.MinPlayers);
 
 		protected BaseGame(GameCode code, int minPlayers, int maxPlayers)
 		{
@@ -53,17 +57,20 @@ namespace CardGames.Core
 		{
 			if (!this.Players.TryLeave(player, out wasHost))
 			{
+				wasHost = false;
 				return false;
 			}
 
 			this.OnPlayerLeft(player);
 
-			this.OnLobbyStateChanged?.Invoke();
+			if (this.State == GameState.Lobby)
+			{
+				this.OnLobbyStateChanged?.Invoke();
+			}
 
 			return true;
 		}
 
-		// @todo Abstract class
 		public bool TryStart(TPlayer player)
 		{
 			if (!this.CanStart || (this.Host != player))
@@ -73,6 +80,9 @@ namespace CardGames.Core
 
 			this.State = GameState.InProgress;
 
+			// @todo Start at random player
+			this.CurrentPlayerIndex = 0;
+
 			this.OnGameStarted();
 
 			this.OnLobbyStateChanged?.Invoke();
@@ -80,20 +90,34 @@ namespace CardGames.Core
 			return true;
 		}
 
-		public void EndGame()
+		protected void EndGame()
+		{
+			this.State = GameState.Finished;
+
+			this.OnGameEnded();
+		}
+
+		public void CancelGame()
 		{
 			this.OnGameDestroyed?.Invoke();
 		}
+
+		protected void NextTurn() =>
+			this.CurrentPlayerIndex = (this.CurrentPlayerIndex + 1) % this.Players.Length;
 
 		protected virtual void OnGameStarted()
 		{
 		}
 
-		protected virtual void OnPlayerJoined(TPlayer player)
+		protected virtual void OnGameEnded()
 		{
 		}
 
-		protected virtual void OnPlayerLeft(TPlayer player)
+		protected virtual void OnPlayerJoined(TPlayer _)
+		{
+		}
+
+		protected virtual void OnPlayerLeft(TPlayer _)
 		{
 		}
 	}

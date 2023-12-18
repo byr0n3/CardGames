@@ -68,8 +68,8 @@ namespace CardGames
 				this.logger.LogInformation("[{Code}] +{Name} ({Current}/{Max})",
 										   game.Code.ToString(),
 										   player.Name.Str(),
-										   g.Players.Current.Str(),
-										   g.Players.Max.Str());
+										   g.Players.Length.Str(),
+										   g.Players.Capacity.Str());
 
 				return true;
 			}
@@ -89,10 +89,10 @@ namespace CardGames
 			this.logger.LogInformation("[{Code}] -{Name} ({Current}/{Max})",
 									   game.Code.ToString(),
 									   player.Name.Str(),
-									   game.Players.Current.Str(),
-									   game.Players.Max.Str());
+									   game.Players.Length.Str(),
+									   game.Players.Capacity.Str());
 
-			if (!wasHost && (game.Players.Current > 0))
+			if (!wasHost && (game.Players.Length > 0))
 			{
 				return;
 			}
@@ -100,7 +100,7 @@ namespace CardGames
 			this.logger.LogInformation("[{Code}] Game is empty, cleaning up!", game.Code.ToString());
 
 			this.games.Remove(game);
-			game.EndGame();
+			game.CancelGame();
 		}
 
 		public bool TryStart(TGame game, TPlayer player)

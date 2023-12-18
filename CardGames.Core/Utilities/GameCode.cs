@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 
 namespace CardGames.Core.Utilities
@@ -24,6 +25,7 @@ namespace CardGames.Core.Utilities
 			this.data[this.position++] = @char;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Reset() =>
 			this.position = 0;
 

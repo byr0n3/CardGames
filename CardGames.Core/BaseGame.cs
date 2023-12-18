@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using CardGames.Core.Utilities;
 
 namespace CardGames.Core
@@ -99,11 +100,17 @@ namespace CardGames.Core
 
 		public void CancelGame()
 		{
+			if (this.Players.Length != 0)
+			{
+				return;
+			}
+
 			this.OnGameDestroyed?.Invoke();
 		}
 
-		protected void NextTurn() =>
-			this.CurrentPlayerIndex = (this.CurrentPlayerIndex + 1) % this.Players.Length;
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected void NextTurn(int skipAmount = 1) =>
+			this.CurrentPlayerIndex = (this.CurrentPlayerIndex + skipAmount) % this.Players.Length;
 
 		protected virtual void OnGameStarted()
 		{

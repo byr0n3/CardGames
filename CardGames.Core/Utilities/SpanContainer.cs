@@ -37,10 +37,8 @@ namespace CardGames.Core.Utilities
 		public bool Equals(SpanContainer<T> other) =>
 			System.MemoryExtensions.SequenceEqual(this.AsSpan(), other.AsSpan());
 
-		public override bool Equals(object? @object)
-		{
-			return @object is SpanContainer<T> other && this.Equals(other);
-		}
+		public override bool Equals(object? @object) =>
+			@object is SpanContainer<T> other && this.Equals(other);
 
 		// @todo Refactor
 		public override int GetHashCode() =>

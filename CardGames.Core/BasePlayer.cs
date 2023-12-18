@@ -2,7 +2,7 @@ using CardGames.Core.Utilities;
 
 namespace CardGames.Core
 {
-	public class BasePlayer : IPlayer<BasePlayer>, System.IEquatable<BasePlayer>
+	public class BasePlayer : System.IEquatable<BasePlayer>
 	{
 		public int Key { get; }
 
@@ -13,9 +13,6 @@ namespace CardGames.Core
 			this.Key = key;
 			this.Name = name;
 		}
-
-		public static BasePlayer Create(int key, System.ReadOnlySpan<char> name) =>
-			new(key, name);
 
 		public bool Equals(BasePlayer? other) =>
 			other is not null && (this.Key == other.Key);

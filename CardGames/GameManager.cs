@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CardGames
 {
-	public sealed class GameManager<TGame, TPlayer> where TGame : BaseGame<TPlayer>, IGame<TGame, TPlayer>
+	public sealed class GameManager<TGame, TPlayer> where TGame : BaseGame<TPlayer>, IGame<TGame>
 													where TPlayer : BasePlayer, IPlayer<TPlayer>
 	{
 		private const int prefillAmount = 2;

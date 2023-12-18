@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 namespace CardGames.Frontend.Components
 {
 	public sealed partial class BaseGameView<TGame, TPlayer> : ComponentBase, System.IDisposable
-		where TGame : BaseGame<TPlayer>, IGame<TGame, TPlayer>
+		where TGame : BaseGame<TPlayer>, IGame<TGame>
 		where TPlayer : BasePlayer, IPlayer<TPlayer>
 	{
 		[Inject] public required GameManager<TGame, TPlayer> GameManager { get; init; }

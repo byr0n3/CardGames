@@ -1,15 +1,18 @@
+using System.Runtime.CompilerServices;
 using CardGames.Core.Uno.Extensions;
 using CardGames.Core.Utilities;
 
 namespace CardGames.Core.Uno
 {
-	public sealed class UnoGame : BaseGame<UnoPlayer>, IGame<UnoGame, UnoPlayer>
+	public sealed class UnoGame : BaseGame<UnoPlayer>, IGame<UnoGame>
 	{
 		internal const int StartingCardCount = 7;
 
 		private readonly CardDeck deck;
 
 		public Card TopCard { get; private set; }
+
+		private bool reversed;
 
 		public event VoidEvent? OnGameStateChanged;
 
@@ -29,6 +32,8 @@ namespace CardGames.Core.Uno
 			}
 
 			this.TopCard = this.deck.Draw();
+
+			this.reversed = false;
 		}
 
 		protected override void OnPlayerLeft(UnoPlayer _)
@@ -36,6 +41,8 @@ namespace CardGames.Core.Uno
 			if (this.Players.Length == 1)
 			{
 				this.EndGame();
+
+				this.OnGameStateChanged?.Invoke();
 			}
 
 			// If the game has finished and a player leaves,
@@ -58,13 +65,18 @@ namespace CardGames.Core.Uno
 
 			player.RemoveCard(card);
 
+			if (card.Value == CardValue.Reverse)
+			{
+				this.reversed = !this.reversed;
+			}
+
 			if (player.CardCount == 0)
 			{
 				this.EndGame();
 			}
 			else
 			{
-				this.NextTurn();
+				this.NextTurn(UnoGame.GetNextPlayerValue(card.Value, this.reversed));
 			}
 
 			this.OnGameStateChanged?.Invoke();
@@ -86,16 +98,27 @@ namespace CardGames.Core.Uno
 				this.RefillDeck();
 			}
 
-			this.NextTurn();
+			this.NextTurn(UnoGame.GetNextPlayerValue(CardValue.None, this.reversed));
 
 			this.OnGameStateChanged?.Invoke();
 		}
 
-		private void RefillDeck()
-		{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void RefillDeck() =>
 			this.deck.Fill();
 
-			this.deck.Shuffle();
+		private static int GetNextPlayerValue(CardValue card, bool reversed)
+		{
+			const int @default = 1;
+
+			var result = (reversed ? -@default : @default);
+
+			if (card == CardValue.Skip)
+			{
+				result *= 2;
+			}
+
+			return result;
 		}
 
 		public static UnoGame Create(GameCode code, int minPlayers, int maxPlayers) =>

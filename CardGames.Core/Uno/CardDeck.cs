@@ -22,8 +22,6 @@ namespace CardGames.Core.Uno
 			this.cards = new List<Card>(CardDeck.deckSize);
 
 			this.Fill();
-
-			this.Shuffle();
 		}
 
 		public Card Draw()
@@ -33,9 +31,11 @@ namespace CardGames.Core.Uno
 				return default;
 			}
 
-			var card = this.cards[0];
+			var index = this.rnd.Next(this.cards.Count);
 
-			this.cards.RemoveAt(0);
+			var card = this.cards[index];
+
+			this.cards.RemoveAt(index);
 
 			return card;
 		}
@@ -50,18 +50,6 @@ namespace CardGames.Core.Uno
 				}
 
 				CardDeck.AddCardsForColor(this.cards, color);
-			}
-		}
-
-		[System.Obsolete("Better random")]
-		public void Shuffle()
-		{
-			var i = this.cards.Count;
-			while (i > 1)
-			{
-				i--;
-				var k = this.rnd.Next(i + 1);
-				(this.cards[k], this.cards[i]) = (this.cards[i], this.cards[k]);
 			}
 		}
 

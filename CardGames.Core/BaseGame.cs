@@ -109,8 +109,12 @@ namespace CardGames.Core
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected void NextTurn(int skipAmount = 1) =>
-			this.CurrentPlayerIndex = (this.CurrentPlayerIndex + skipAmount) % this.Players.Length;
+		protected void NextTurn(int skipAmount = 1)
+		{
+			var mod = (this.CurrentPlayerIndex + skipAmount) % this.Players.Length;
+
+			this.CurrentPlayerIndex = mod < 0 ? mod + this.Players.Length : mod;
+		}
 
 		protected virtual void OnGameStarted()
 		{

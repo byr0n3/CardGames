@@ -8,15 +8,14 @@ namespace CardGames.Core
 	{
 		public delegate void VoidEvent();
 
-		public GameCode Code { get; }
-
-		public int MinPlayers { get; }
+		public readonly GameCode Code;
 
 		public GameState State { get; private set; }
 
 		public int CurrentPlayerIndex { get; private set; }
 
 		public readonly PlayerList<TPlayer> Players;
+		private readonly int minPlayers;
 
 		public event VoidEvent? OnLobbyStateChanged;
 		public event VoidEvent? OnGameDestroyed;
@@ -27,13 +26,13 @@ namespace CardGames.Core
 			this.Players[0]!;
 
 		public bool CanStart =>
-			(this.State == GameState.Lobby) && (this.Players.Length >= this.MinPlayers);
+			(this.State == GameState.Lobby) && (this.Players.Length >= this.minPlayers);
 
 		protected BaseGame(GameCode code, int minPlayers, int maxPlayers)
 		{
 			this.Code = code;
 
-			this.MinPlayers = minPlayers;
+			this.minPlayers = minPlayers;
 			this.State = GameState.Lobby;
 
 			this.Players = new PlayerList<TPlayer>(maxPlayers);
@@ -91,13 +90,6 @@ namespace CardGames.Core
 			return true;
 		}
 
-		protected void EndGame()
-		{
-			this.State = GameState.Finished;
-
-			this.OnGameEnded();
-		}
-
 		public void CancelGame()
 		{
 			if (this.Players.Length != 0)
@@ -106,6 +98,13 @@ namespace CardGames.Core
 			}
 
 			this.OnGameDestroyed?.Invoke();
+		}
+
+		protected void EndGame()
+		{
+			this.State = GameState.Finished;
+
+			this.OnGameEnded();
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -7,6 +7,11 @@ namespace CardGames.Core.Uno.Extensions
 	{
 		public static bool CanPlay(this Card @this, Card card)
 		{
+			if (@this.IsDefault || card.IsDefault)
+			{
+				return false;
+			}
+
 			// +2 and +4 cards are stackable
 			if ((@this.Value is CardValue.DrawTwo or CardValue.DrawFour) &&
 				(card.Value is CardValue.DrawTwo or CardValue.DrawFour))
@@ -16,6 +21,21 @@ namespace CardGames.Core.Uno.Extensions
 
 			return (@this.Color == CardColor.Wild) || (card.Color == CardColor.Wild) ||
 				   (@this.Color == card.Color) || (@this.Value == card.Value);
+		}
+
+		public static bool HasPlayableCard(this UnoPlayer @this, Card card)
+		{
+			var enumerator = @this.CardsEnumerator();
+
+			while (enumerator.MoveNext())
+			{
+				if (card.CanPlay(enumerator.Current))
+				{
+					return true;
+				}
+			}
+
+			return false;
 		}
 	}
 }

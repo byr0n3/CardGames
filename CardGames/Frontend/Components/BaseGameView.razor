@@ -24,9 +24,9 @@
 			Leave
 		</button>
 
-		@if ((Game.Host == CurrentPlayer) && Game.CanStart)
+		@if ((Game.Host == CurrentPlayer))
 		{
-			<button type="button" class="btn btn-danger" @onclick="@(StartGame)">
+			<button type="button" class="btn btn-danger" @onclick="@(StartGame)" disabled="@(!Game.CanStart)">
 				Start (@(Game.Players.Length.Str())/@(Game.Players.Capacity.Str())
 			</button>
 		}

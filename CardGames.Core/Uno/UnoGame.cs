@@ -55,8 +55,7 @@ namespace CardGames.Core.Uno
 
 		public void PlayCard(UnoPlayer player, Card card)
 		{
-			if ((this.State != GameState.InProgress) || (this.Players.GetIndex(player) != this.CurrentPlayerIndex) ||
-				(card.IsDefault) || !this.TopCard.CanPlay(card) || !player.HasCard(card))
+			if (!this.CanPlayCard(player, card))
 			{
 				return;
 			}
@@ -84,28 +83,49 @@ namespace CardGames.Core.Uno
 
 		public void DrawCard(UnoPlayer player)
 		{
-			if ((this.State != GameState.InProgress) || (this.Players.GetIndex(player) != this.CurrentPlayerIndex))
+			if (!this.CanDrawCard(player))
 			{
 				return;
 			}
 
-			var card = this.deck.Draw();
+			Card card = default;
 
-			player.AddCard(card);
-
-			if (this.deck.CardsLeft == 0)
+			while (!this.TopCard.CanPlay(card))
 			{
-				this.RefillDeck();
+				card = this.deck.Draw();
+
+				player.AddCard(card);
+
+				if (this.deck.CardsLeft == 0)
+				{
+					this.deck.Fill();
+				}
 			}
 
-			this.NextTurn(UnoGame.GetNextPlayerValue(CardValue.None, this.reversed));
+			// Don't go to the next turn here, player has to play the playable card
 
 			this.OnGameStateChanged?.Invoke();
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void RefillDeck() =>
-			this.deck.Fill();
+		public bool CanPlayCard(UnoPlayer player, Card card) =>
+			// Game is in progress
+			(this.State == GameState.InProgress) &&
+			// It's the player's turn
+			(this.Players.GetIndex(player) == this.CurrentPlayerIndex) &&
+			// Card can be played onto the current card
+			this.TopCard.CanPlay(card) &&
+			// Security check; player has the card they want to play
+			player.HasCard(card);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool CanDrawCard(UnoPlayer player) =>
+			// Game is in progress
+			(this.State == GameState.InProgress) &&
+			// It's the player's turn
+			(this.Players.GetIndex(player) == this.CurrentPlayerIndex) &&
+			// Player doesn't have a playable card
+			!player.HasPlayableCard(this.TopCard);
 
 		private static int GetNextPlayerValue(CardValue card, bool reversed)
 		{

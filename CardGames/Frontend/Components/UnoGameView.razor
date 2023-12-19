@@ -8,7 +8,7 @@
 	<div>
 		<UnoCard Card="@(Game.TopCard)" />
 
-		<button type="button" class="btn btn-primary" @onclick="@(DrawCard)">
+		<button type="button" class="btn btn-primary" @onclick="@(DrawCard)" disabled="@(!Game.CanDrawCard(CurrentPlayer))">
 			Draw
 		</button>
 	</div>

@@ -113,6 +113,8 @@ namespace CardGames.Core
 			var mod = (this.CurrentPlayerIndex + skipAmount) % this.Players.Length;
 
 			this.CurrentPlayerIndex = mod < 0 ? mod + this.Players.Length : mod;
+
+			this.OnNextTurn();
 		}
 
 		protected virtual void OnGameStarted()
@@ -120,6 +122,10 @@ namespace CardGames.Core
 		}
 
 		protected virtual void OnGameEnded()
+		{
+		}
+
+		protected virtual void OnNextTurn()
 		{
 		}
 

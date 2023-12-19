@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using CardGames.Core.Uno.Extensions;
 using CardGames.Core.Utilities;
@@ -12,7 +13,7 @@ namespace CardGames.Core.Uno
 
 		public Card TopCard { get; private set; }
 
-		private bool reversed;
+		private UnoGameFlags flags;
 
 		public event VoidEvent? OnGameStateChanged;
 
@@ -33,7 +34,30 @@ namespace CardGames.Core.Uno
 
 			this.TopCard = this.deck.Draw();
 
-			this.reversed = false;
+			this.flags = UnoGameFlags.None;
+		}
+
+		protected override void OnNextTurn()
+		{
+			if ((this.flags & UnoGameFlags.DrawNextPlayer) == UnoGameFlags.None)
+			{
+				return;
+			}
+
+			var drawAmount = ((this.flags & UnoGameFlags.DrawTwo) != UnoGameFlags.None) ? 2 : 4;
+			var player = this.Players[this.CurrentPlayerIndex];
+
+			// @todo Valid check
+			Debug.Assert(player is not null);
+
+			for (var i = 0; i < drawAmount; i++)
+			{
+				this.AddCardToPlayer(player);
+			}
+
+			this.flags &= ~UnoGameFlags.DrawNextPlayer;
+
+			this.NextTurn(UnoGame.GetNextPlayerModifier(this.flags));
 		}
 
 		protected override void OnPlayerLeft(UnoPlayer _)
@@ -64,19 +88,20 @@ namespace CardGames.Core.Uno
 
 			player.RemoveCard(card);
 
-			if (card.Value == CardValue.Reverse)
-			{
-				this.reversed = !this.reversed;
-			}
-
 			if (player.CardCount == 0)
 			{
 				this.EndGame();
+
+				this.OnGameStateChanged?.Invoke();
+
+				return;
 			}
-			else
-			{
-				this.NextTurn(UnoGame.GetNextPlayerValue(card.Value, this.reversed));
-			}
+
+			this.HandleCardEffects(card.Value);
+
+			this.NextTurn(UnoGame.GetNextPlayerModifier(this.flags));
+
+			this.flags &= ~UnoGameFlags.SkipNext;
 
 			this.OnGameStateChanged?.Invoke();
 		}
@@ -92,14 +117,7 @@ namespace CardGames.Core.Uno
 
 			while (!this.TopCard.CanPlay(card))
 			{
-				card = this.deck.Draw();
-
-				player.AddCard(card);
-
-				if (this.deck.CardsLeft == 0)
-				{
-					this.deck.Fill();
-				}
+				card = this.AddCardToPlayer(player);
 			}
 
 			// Don't go to the next turn here, player has to play the playable card
@@ -127,13 +145,46 @@ namespace CardGames.Core.Uno
 			// Player doesn't have a playable card
 			!player.HasPlayableCard(this.TopCard);
 
-		private static int GetNextPlayerValue(CardValue card, bool reversed)
+		private void HandleCardEffects(CardValue card)
+		{
+			switch (card)
+			{
+				case CardValue.Reverse:
+					// Toggle reversed flag
+					this.flags ^= UnoGameFlags.Reversed;
+					break;
+
+				case CardValue.Skip:
+					this.flags |= UnoGameFlags.SkipNext;
+					break;
+
+				case CardValue.DrawTwo or CardValue.DrawFour:
+					this.flags |= (card == CardValue.DrawTwo) ? UnoGameFlags.DrawTwo : UnoGameFlags.DrawFour;
+					break;
+			}
+		}
+
+		private Card AddCardToPlayer(UnoPlayer player)
+		{
+			var card = this.deck.Draw();
+
+			player.AddCard(card);
+
+			if (this.deck.CardsLeft == 0)
+			{
+				this.deck.Fill();
+			}
+
+			return card;
+		}
+
+		private static int GetNextPlayerModifier(UnoGameFlags flags)
 		{
 			const int @default = 1;
 
-			var result = (reversed ? -@default : @default);
+			var result = ((flags & UnoGameFlags.Reversed) != UnoGameFlags.None ? -@default : @default);
 
-			if (card == CardValue.Skip)
+			if ((flags & UnoGameFlags.SkipNext) != UnoGameFlags.None)
 			{
 				result *= 2;
 			}

@@ -26,6 +26,9 @@ namespace CardGames.Frontend.Components
 		private void DrawCard() =>
 			this.Game.DrawCard(this.CurrentPlayer);
 
+		private void PickColor(CardColor color) =>
+			this.Game.PickColor(this.CurrentPlayer, color);
+
 		public void Dispose()
 		{
 			this.Game.OnGameStateChanged -= this.Refresh;

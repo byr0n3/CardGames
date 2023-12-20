@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using CardGames.Core.Uno.Extensions;
 using CardGames.Core.Utilities;
@@ -13,7 +12,7 @@ namespace CardGames.Core.Uno
 
 		public Card TopCard { get; private set; }
 
-		private UnoGameFlags flags;
+		public UnoGameFlags Flags { get; private set; }
 
 		public event VoidEvent? OnGameStateChanged;
 
@@ -34,30 +33,28 @@ namespace CardGames.Core.Uno
 
 			this.TopCard = this.deck.Draw();
 
-			this.flags = UnoGameFlags.None;
+			this.Flags = UnoGameFlags.None;
 		}
 
 		protected override void OnNextTurn()
 		{
-			if ((this.flags & UnoGameFlags.DrawNextPlayer) == UnoGameFlags.None)
+			if ((this.Flags & UnoGameFlags.DrawNextPlayer) == UnoGameFlags.None)
 			{
 				return;
 			}
 
-			var drawAmount = ((this.flags & UnoGameFlags.DrawTwo) != UnoGameFlags.None) ? 2 : 4;
-			var player = this.Players[this.CurrentPlayerIndex];
-
-			// @todo Valid check
-			Debug.Assert(player is not null);
+			var drawAmount = ((this.Flags & UnoGameFlags.DrawTwo) != UnoGameFlags.None) ? 2 : 4;
+			var player = this.GetCurrentPlayer();
 
 			for (var i = 0; i < drawAmount; i++)
 			{
 				this.AddCardToPlayer(player);
 			}
 
-			this.flags &= ~UnoGameFlags.DrawNextPlayer;
+			this.Flags &= ~UnoGameFlags.DrawNextPlayer;
 
-			this.NextTurn(UnoGame.GetNextPlayerModifier(this.flags));
+			// Skip the next player; if they have to draw, they don't get to play
+			this.NextTurn(UnoGame.GetNextPlayerModifier(this.Flags));
 		}
 
 		protected override void OnPlayerLeft(UnoPlayer _)
@@ -100,12 +97,12 @@ namespace CardGames.Core.Uno
 			this.HandleCardEffects(card.Value);
 
 			// Don't go to the next turn if the player has to pick a color
-			if ((this.flags & UnoGameFlags.PickColor) == UnoGameFlags.None)
+			if ((this.Flags & UnoGameFlags.PickColor) == UnoGameFlags.None)
 			{
-				this.NextTurn(UnoGame.GetNextPlayerModifier(this.flags));
+				this.NextTurn(UnoGame.GetNextPlayerModifier(this.Flags));
 			}
 
-			this.flags &= ~UnoGameFlags.SkipNext;
+			this.Flags &= ~UnoGameFlags.SkipNext;
 
 			this.OnGameStateChanged?.Invoke();
 		}
@@ -138,9 +135,9 @@ namespace CardGames.Core.Uno
 
 			this.TopCard = new Card(color, this.TopCard.Value);
 
-			this.flags &= ~UnoGameFlags.PickColor;
+			this.Flags &= ~UnoGameFlags.PickColor;
 
-			this.NextTurn(UnoGame.GetNextPlayerModifier(this.flags));
+			this.NextTurn(UnoGame.GetNextPlayerModifier(this.Flags));
 
 			this.OnGameStateChanged?.Invoke();
 		}
@@ -150,9 +147,9 @@ namespace CardGames.Core.Uno
 			// Game is in progress
 			(this.State == GameState.InProgress) &&
 			// It's the player's turn
-			(this.Players.GetIndex(player) == this.CurrentPlayerIndex) &&
+			(this.GetCurrentPlayer() == player) &&
 			// Player doesn't have to pick a color (Wild color or +4)
-			((this.flags & UnoGameFlags.PickColor) == UnoGameFlags.None) &&
+			((this.Flags & UnoGameFlags.PickColor) == UnoGameFlags.None) &&
 			// Card can be played onto the current card
 			this.TopCard.CanPlay(card) &&
 			// Security check; player has the card they want to play
@@ -163,9 +160,9 @@ namespace CardGames.Core.Uno
 			// Game is in progress
 			(this.State == GameState.InProgress) &&
 			// It's the player's turn
-			(this.Players.GetIndex(player) == this.CurrentPlayerIndex) &&
+			(this.GetCurrentPlayer() == player) &&
 			// Player doesn't have to pick a color (Wild color or +4)
-			((this.flags & UnoGameFlags.PickColor) == UnoGameFlags.None) &&
+			((this.Flags & UnoGameFlags.PickColor) == UnoGameFlags.None) &&
 			// Player doesn't have a playable card
 			!player.HasPlayableCard(this.TopCard);
 
@@ -174,9 +171,9 @@ namespace CardGames.Core.Uno
 			// Game is in progress
 			(this.State == GameState.InProgress) &&
 			// It's the player's turn
-			(this.Players.GetIndex(player) == this.CurrentPlayerIndex) &&
+			(this.GetCurrentPlayer() == player) &&
 			// Game is waiting for player to pick a color
-			((this.flags & UnoGameFlags.PickColor) != UnoGameFlags.None);
+			((this.Flags & UnoGameFlags.PickColor) != UnoGameFlags.None);
 
 		private void HandleCardEffects(CardValue card)
 		{
@@ -184,24 +181,24 @@ namespace CardGames.Core.Uno
 			{
 				case CardValue.Reverse:
 					// Toggle reversed flag
-					this.flags ^= UnoGameFlags.Reversed;
+					this.Flags ^= UnoGameFlags.Reversed;
 					break;
 
 				case CardValue.Skip:
-					this.flags |= UnoGameFlags.SkipNext;
+					this.Flags |= UnoGameFlags.SkipNext;
 					break;
 
 				case CardValue.Wild:
-					this.flags |= UnoGameFlags.PickColor;
+					this.Flags |= UnoGameFlags.PickColor;
 					break;
 
 				case CardValue.DrawTwo or CardValue.DrawFour:
 				{
-					this.flags |= (card == CardValue.DrawTwo) ? UnoGameFlags.DrawTwo : UnoGameFlags.DrawFour;
+					this.Flags |= (card == CardValue.DrawTwo) ? UnoGameFlags.DrawTwo : UnoGameFlags.DrawFour;
 
 					if (card == CardValue.DrawFour)
 					{
-						this.flags |= UnoGameFlags.PickColor;
+						this.Flags |= UnoGameFlags.PickColor;
 					}
 
 					break;

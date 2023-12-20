@@ -1,7 +1,7 @@
 namespace CardGames.Core.Uno
 {
 	[System.Flags]
-	internal enum UnoGameFlags
+	public enum UnoGameFlags
 	{
 		None = 0,
 		Reversed = 1 << 0,

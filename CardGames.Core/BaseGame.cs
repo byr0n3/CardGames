@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using CardGames.Core.Utilities;
@@ -20,10 +21,8 @@ namespace CardGames.Core
 		public event VoidEvent? OnLobbyStateChanged;
 		public event VoidEvent? OnGameDestroyed;
 
-		// We can assume the player isn't null here,
-		// the game would've been deleted if so.
 		public TPlayer Host =>
-			this.Players[0]!;
+			this.GetPlayer(0);
 
 		public bool CanStart =>
 			(this.State == GameState.Lobby) && (this.Players.Length >= this.minPlayers);
@@ -36,6 +35,31 @@ namespace CardGames.Core
 			this.State = GameState.Lobby;
 
 			this.Players = new PlayerList<TPlayer>(maxPlayers);
+		}
+
+		/// <summary>
+		/// Get the <see cref="TPlayer"/> that is currently allowed to play
+		/// </summary>
+		/// <returns>The <see cref="TPlayer"/> that is currently allowed to play.</returns>
+		/// <remarks>This function asserts that the <see cref="TPlayer"/> always exists and is valid.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public TPlayer GetCurrentPlayer() =>
+			this.GetPlayer(this.CurrentPlayerIndex);
+
+		/// <summary>
+		/// Get the <see cref="TPlayer"/> at the given index.
+		/// </summary>
+		/// <param name="index">The index of the targeted <see cref="TPlayer"/>.</param>
+		/// <returns>The <see cref="TPlayer"/> at the given index.</returns>
+		/// <remarks>This function asserts that the <see cref="TPlayer"/> always exists and is valid.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public TPlayer GetPlayer(int index)
+		{
+			var player = this.Players[index];
+
+			Debug.Assert(player is not null);
+
+			return player;
 		}
 
 		public bool TryJoin(System.ReadOnlySpan<char> name, [NotNullWhen(true)] out TPlayer? player)

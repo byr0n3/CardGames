@@ -1,5 +1,9 @@
 .uno-card {
-    border: 1px solid black;
-    padding: var(--spacing);
-    border-radius: var(--border-radius);
+    background-image: url("uno/cards.png");
+    background-repeat: no-repeat;
+    display: block;
+    width: 548px;
+    height: 760px;
+
+    background-position: -200px -130px;
 }

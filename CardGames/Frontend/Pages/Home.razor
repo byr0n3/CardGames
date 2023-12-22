@@ -1,7 +1,11 @@
 ﻿@page "/"
+@using CardGames.Frontend.Components.Uno
+@using CardGames.Core.Uno
 
 <PageTitle>Card Games</PageTitle>
 
 <h1>Card Games</h1>
 
 Welcome to your new app.
+
+<UnoCard Card="@(new Card(CardColor.Red, CardValue.Five))" />

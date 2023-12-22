@@ -13,7 +13,7 @@ namespace CardGames.Core.Uno
 		public bool IsDefault =>
 			this.Color == CardColor.None || this.Value == CardValue.None;
 
-		internal Card(CardColor color, CardValue value)
+		public Card(CardColor color, CardValue value)
 		{
 			this.Color = color;
 			this.Value = value;

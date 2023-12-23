@@ -67,11 +67,6 @@ namespace CardGames.Core.Uno
 				return;
 			}
 
-			CardDeck.AddValueCards(cards, color);
-		}
-
-		private static void AddValueCards(List<Card> cards, CardColor color)
-		{
 			foreach (var value in CardDeck.cardValues)
 			{
 				// ReSharper disable once ConvertIfStatementToSwitchStatement

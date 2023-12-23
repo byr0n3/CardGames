@@ -8,13 +8,12 @@ namespace CardGames.Core.Uno
 	{
 		internal const int StartingCardCount = 7;
 
-		private readonly CardDeck deck;
+		public event VoidEvent? OnGameStateChanged;
 
 		public Card TopCard { get; private set; }
-
 		public UnoGameFlags Flags { get; private set; }
 
-		public event VoidEvent? OnGameStateChanged;
+		private readonly CardDeck deck;
 
 		private UnoGame(GameCode code, int minPlayers, int maxPlayers) : base(code, minPlayers, maxPlayers)
 		{
@@ -36,10 +35,16 @@ namespace CardGames.Core.Uno
 			this.Flags = UnoGameFlags.None;
 		}
 
+		protected override void OnGameEnded() =>
+			this.OnGameStateChanged?.Invoke();
+
 		protected override void OnNextTurn()
 		{
+			// If there wasn't any draw card played we can safely reset the game flags
 			if ((this.Flags & UnoGameFlags.DrawNextPlayer) == UnoGameFlags.None)
 			{
+				this.Flags &= ~UnoGameFlags.ResetOnNextTurn;
+
 				return;
 			}
 
@@ -51,10 +56,10 @@ namespace CardGames.Core.Uno
 				this.AddCardToPlayer(player);
 			}
 
-			this.Flags &= ~UnoGameFlags.DrawNextPlayer;
-
-			// Skip the next player; if they have to draw, they don't get to play
+			// Skip the next player; if they have to draw, they don't get to play a card
 			this.NextTurn(UnoGame.GetNextPlayerModifier(this.Flags));
+
+			this.Flags &= ~UnoGameFlags.ResetOnNextTurn;
 		}
 
 		protected override void OnPlayerLeft(UnoPlayer _)
@@ -63,7 +68,15 @@ namespace CardGames.Core.Uno
 			{
 				this.EndGame();
 
-				this.OnGameStateChanged?.Invoke();
+				return;
+			}
+
+			// Adjust the current player to be a player that's actually in the game
+			// If we don't the game will crash/be infinitely stuck if the current player leaves
+			while (this.CurrentPlayerIndex >= this.Players.Length)
+			{
+				// @todo Add silent flag to not call `OnNextTurn`?
+				this.NextTurn();
 			}
 
 			// If the game has finished and a player leaves,
@@ -89,8 +102,6 @@ namespace CardGames.Core.Uno
 			{
 				this.EndGame();
 
-				this.OnGameStateChanged?.Invoke();
-
 				return;
 			}
 
@@ -101,8 +112,6 @@ namespace CardGames.Core.Uno
 			{
 				this.NextTurn(UnoGame.GetNextPlayerModifier(this.Flags));
 			}
-
-			this.Flags &= ~UnoGameFlags.SkipNext;
 
 			this.OnGameStateChanged?.Invoke();
 		}
@@ -134,8 +143,6 @@ namespace CardGames.Core.Uno
 			}
 
 			this.TopCard = new Card(color, this.TopCard.Value);
-
-			this.Flags &= ~UnoGameFlags.PickColor;
 
 			this.NextTurn(UnoGame.GetNextPlayerModifier(this.Flags));
 

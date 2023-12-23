@@ -9,17 +9,16 @@ namespace CardGames.Core
 	{
 		public delegate void VoidEvent();
 
+		public event VoidEvent? OnLobbyStateChanged;
+		public event VoidEvent? OnGameDestroyed;
+
 		public readonly GameCode Code;
 
 		public GameState State { get; private set; }
-
-		public int CurrentPlayerIndex { get; private set; }
+		protected int CurrentPlayerIndex { get; private set; }
 
 		public readonly PlayerList<TPlayer> Players;
 		private readonly int minPlayers;
-
-		public event VoidEvent? OnLobbyStateChanged;
-		public event VoidEvent? OnGameDestroyed;
 
 		public TPlayer Host =>
 			this.GetPlayer(0);
@@ -77,12 +76,17 @@ namespace CardGames.Core
 			return true;
 		}
 
-		public bool TryLeave(TPlayer player, out bool wasHost)
+		public bool TryLeave(TPlayer player)
 		{
-			if (!this.Players.TryLeave(player, out wasHost))
+			if (!this.Players.TryLeave(player))
 			{
-				wasHost = false;
 				return false;
+			}
+
+			// Game is empty, no need to update any clients
+			if (this.Players.Length == 0)
+			{
+				return true;
 			}
 
 			this.OnPlayerLeft(player);

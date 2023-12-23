@@ -1,6 +1,7 @@
 @using CardGames.Core.Uno
+@using CardGames.Extensions
 
-<div class="uno-card" @onclick="@(OnClick)">
+<div class="uno-card" style="@(style)" @onclick="@(OnClick)">
 </div>
 
 @code {
@@ -9,7 +10,42 @@
 
 	[Parameter] public System.Action<Card>? OnCardClick { get; set; }
 
+	private string style = string.Empty;
+
+	protected override void OnParametersSet() =>
+		style = UnoCard.GetCardStyle(Card);
+
 	private void OnClick() =>
 		OnCardClick?.Invoke(Card);
+
+	// @todo Optimize
+	private static string GetCardStyle(Card card)
+	{
+		const string valueVar = "--value";
+		const string colorVar = "--color";
+
+		// (variable length + : + int + ;) * 2
+		var builder = new System.Text.StringBuilder(valueVar.Length + 3 + colorVar.Length + 3);
+
+		// Weird mapping due to the sprite sheet layout
+		var valueIndex = card.Color is CardColor.Wild ? (int)CardValue.DrawTwo : ((int)card.Value - 1);
+		var colorIndex = (card.Value) switch
+		{
+			CardValue.Wild     => 0,
+			CardValue.DrawFour => 1,
+			_                  => ((int)card.Color - 1),
+		};
+
+		builder.Append(valueVar);
+		builder.Append(':');
+		builder.Append(valueIndex);
+		builder.Append(';');
+		builder.Append(colorVar);
+		builder.Append(':');
+		builder.Append(colorIndex);
+		builder.Append(';');
+
+		return builder.ToString();
+	}
 
 }

@@ -7,9 +7,9 @@ namespace CardGames.Core.Uno
 	{
 		None = 0,
 		Red,
+		Yellow,
 		Green,
 		Blue,
-		Yellow,
 		Wild,
 	}
 }

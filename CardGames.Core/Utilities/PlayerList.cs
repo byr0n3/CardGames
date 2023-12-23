@@ -40,23 +40,21 @@ namespace CardGames.Core.Utilities
 			return true;
 		}
 
-		public bool TryLeave(TPlayer player, out bool wasHost)
+		public bool TryLeave(TPlayer player)
 		{
 			var idx = this.GetIndex(player);
 
 			if (idx == -1)
 			{
-				wasHost = false;
 				return false;
 			}
 
-			// Player we want to remove is at the start or at the end, just set it to null
-			if ((idx == 0) || (idx == this.Length - 1))
+			// Player we want to remove is at the end, just set it to null
+			if ((idx == this.Length - 1))
 			{
 				this.array[idx] = null;
 				this.Length--;
 
-				wasHost = (idx == 0);
 				return true;
 			}
 
@@ -68,7 +66,6 @@ namespace CardGames.Core.Utilities
 
 			this.Length--;
 
-			wasHost = false;
 			return true;
 		}
 

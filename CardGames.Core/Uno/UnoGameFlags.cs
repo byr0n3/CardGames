@@ -11,5 +11,6 @@ namespace CardGames.Core.Uno
 		PickColor = 1 << 4,
 
 		DrawNextPlayer = UnoGameFlags.DrawTwo | UnoGameFlags.DrawFour,
+		ResetOnNextTurn = UnoGameFlags.SkipNext | UnoGameFlags.PickColor | UnoGameFlags.DrawNextPlayer,
 	}
 }

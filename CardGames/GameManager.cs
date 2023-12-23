@@ -1,9 +1,12 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using CardGames.Core;
 using CardGames.Core.Extensions;
 using CardGames.Core.Utilities;
 using CardGames.Extensions;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace CardGames
@@ -46,7 +49,7 @@ namespace CardGames
 
 			this.games.Add(game);
 
-			this.logger.LogInformation("[{Code}] {Game} created", game.Code.ToString(), typeof(TGame).Name);
+			this.Log("[{Code}] {Game} created", game.Code.ToString(), typeof(TGame).Name);
 
 			return true;
 		}
@@ -65,11 +68,11 @@ namespace CardGames
 
 				game = g;
 
-				this.logger.LogInformation("[{Code}] +{Name} ({Current}/{Max})",
-										   game.Code.ToString(),
-										   player.Name.Str(),
-										   g.Players.Length.Str(),
-										   g.Players.Capacity.Str());
+				this.Log("[{Code}] +{Name} ({Current}/{Max})",
+						 game.Code.ToString(),
+						 player.Name.Str(),
+						 g.Players.Length.Str(),
+						 g.Players.Capacity.Str());
 
 				return true;
 			}
@@ -81,23 +84,23 @@ namespace CardGames
 
 		public void Leave(TGame game, TPlayer player)
 		{
-			if (!game.TryLeave(player, out var wasHost))
+			if (!game.TryLeave(player))
 			{
 				return;
 			}
 
-			this.logger.LogInformation("[{Code}] -{Name} ({Current}/{Max})",
-									   game.Code.ToString(),
-									   player.Name.Str(),
-									   game.Players.Length.Str(),
-									   game.Players.Capacity.Str());
+			this.Log("[{Code}] -{Name} ({Current}/{Max})",
+					 game.Code.ToString(),
+					 player.Name.Str(),
+					 game.Players.Length.Str(),
+					 game.Players.Capacity.Str());
 
-			if (!wasHost && (game.Players.Length > 0))
+			if (game.Players.Length > 0)
 			{
 				return;
 			}
 
-			this.logger.LogInformation("[{Code}] Game is empty, cleaning up!", game.Code.ToString());
+			this.Log("[{Code}] Cleaning up", game.Code.ToString());
 
 			this.games.Remove(game);
 			game.CancelGame();
@@ -110,7 +113,7 @@ namespace CardGames
 				return false;
 			}
 
-			this.logger.LogInformation("[{Code}] Game has started", game.Code.ToString());
+			this.Log("[{Code}] Game has started", game.Code.ToString());
 
 			return true;
 		}
@@ -146,5 +149,12 @@ namespace CardGames
 				code.Append(map[this.rnd.Next(0, map.Length)]);
 			}
 		}
+
+		[Conditional("DEBUG")]
+		[SuppressMessage("Usage", "CA2254")]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[SuppressMessage("ReSharper", "TemplateIsNotCompileTimeConstantProblem")]
+		private void Log([StructuredMessageTemplate] string? message, params object?[] args) =>
+			this.logger.LogInformation(message, args);
 	}
 }

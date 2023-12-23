@@ -1,5 +1,7 @@
 @using CardGames.Core.Uno
+@using CardGames.Core.Utilities
 @using CardGames.Extensions
+@using CardGames.Core.Extensions
 
 <div class="uno-card" style="@(style)" @onclick="@(OnClick)">
 </div>
@@ -18,14 +20,10 @@
 	private void OnClick() =>
 		OnCardClick?.Invoke(Card);
 
-	// @todo Optimize
 	private static string GetCardStyle(Card card)
 	{
 		const string valueVar = "--value";
 		const string colorVar = "--color";
-
-		// (variable length + : + int + ;) * 2
-		var builder = new System.Text.StringBuilder(valueVar.Length + 3 + colorVar.Length + 3);
 
 		// Weird mapping due to the sprite sheet layout
 		var valueIndex = card.Color is CardColor.Wild ? (int)CardValue.DrawTwo : ((int)card.Value - 1);
@@ -35,6 +33,11 @@
 			CardValue.DrawFour => 1,
 			_                  => ((int)card.Color - 1),
 		};
+
+		// (variable length + : + int + ;) * 2
+		System.Span<char> temp = stackalloc char[valueVar.Length + 2 + valueIndex.GetCharSize() + colorVar.Length + 2 + colorIndex.GetCharSize()];
+
+		var builder = new CharStringBuilder(temp);
 
 		builder.Append(valueVar);
 		builder.Append(':');

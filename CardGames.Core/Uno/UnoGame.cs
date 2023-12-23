@@ -56,10 +56,10 @@ namespace CardGames.Core.Uno
 				this.AddCardToPlayer(player);
 			}
 
+			this.Flags &= ~UnoGameFlags.DrawNextPlayer;
+
 			// Skip the next player; if they have to draw, they don't get to play a card
 			this.NextTurn(UnoGame.GetNextPlayerModifier(this.Flags));
-
-			this.Flags &= ~UnoGameFlags.ResetOnNextTurn;
 		}
 
 		protected override void OnPlayerLeft(UnoPlayer _)

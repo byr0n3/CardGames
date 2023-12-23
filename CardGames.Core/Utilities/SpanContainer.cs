@@ -9,29 +9,71 @@ namespace CardGames.Core.Utilities
 	public readonly unsafe struct SpanContainer<T> : System.IEquatable<SpanContainer<T>> where T : unmanaged
 	{
 		private readonly T* ptr;
-		private readonly int length;
+		public readonly int Length;
 
+		[System.Obsolete("Don't use default constructor", true)]
 		public SpanContainer()
 		{
-			this.ptr = null;
-			this.length = 0;
 		}
 
 		public SpanContainer(System.ReadOnlySpan<T> span)
 		{
 			this.ptr = (T*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(span));
-			this.length = span.Length;
+			this.Length = span.Length;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public System.ReadOnlySpan<T> AsSpan(int size = 0)
+		public System.ReadOnlySpan<T> AsSpan(int length = 0)
 		{
-			if (size <= 0)
+			if (length <= 0)
 			{
-				size = this.length;
+				length = this.Length;
 			}
 
-			return new System.ReadOnlySpan<T>(this.ptr, size);
+			return new System.ReadOnlySpan<T>(this.ptr, length);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public System.ReadOnlySpan<T> AsSpan(int start, int length)
+		{
+			if (start < 0)
+			{
+				start = 0;
+			}
+
+			if (length <= 0)
+			{
+				length = this.Length;
+			}
+
+			return new System.ReadOnlySpan<T>(this.ptr, this.Length).Slice(start, length);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public System.Span<T> AsWritableSpan(int length = 0)
+		{
+			if (length <= 0)
+			{
+				length = this.Length;
+			}
+
+			return new System.Span<T>(this.ptr, length);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public System.Span<T> AsWritableSpan(int start, int length)
+		{
+			if (start < 0)
+			{
+				start = 0;
+			}
+
+			if (length <= 0)
+			{
+				length = this.Length;
+			}
+
+			return new System.Span<T>(this.ptr, this.Length).Slice(start, length);
 		}
 
 		public bool Equals(SpanContainer<T> other) =>
@@ -42,7 +84,7 @@ namespace CardGames.Core.Utilities
 
 		// @todo Refactor
 		public override int GetHashCode() =>
-			System.HashCode.Combine(unchecked((int)(long)this.ptr), this.length);
+			System.HashCode.Combine(unchecked((int)(long)this.ptr), this.Length);
 
 		public static bool operator ==(SpanContainer<T> left, SpanContainer<T> right) =>
 			left.Equals(right);

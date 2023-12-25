@@ -37,5 +37,20 @@ namespace CardGames.Core.Uno.Extensions
 
 			return false;
 		}
+
+		public static bool HasDrawCard(this UnoPlayer @this)
+		{
+			var enumerator = @this.CardsEnumerator();
+
+			while (enumerator.MoveNext())
+			{
+				if (enumerator.Current.Value is CardValue.DrawTwo or CardValue.DrawFour)
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
 	}
 }

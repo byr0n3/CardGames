@@ -15,6 +15,8 @@ namespace CardGames.Core.Uno
 
 		private readonly CardDeck deck;
 
+		private int drawAmount;
+
 		private UnoGame(GameCode code, int minPlayers, int maxPlayers) : base(code, minPlayers, maxPlayers)
 		{
 			this.deck = new CardDeck();
@@ -33,6 +35,8 @@ namespace CardGames.Core.Uno
 			this.TopCard = this.deck.Draw();
 
 			this.Flags = UnoGameFlags.None;
+
+			this.drawAmount = 0;
 		}
 
 		protected override void OnGameEnded() =>
@@ -44,14 +48,23 @@ namespace CardGames.Core.Uno
 			if ((this.Flags & UnoGameFlags.DrawNextPlayer) == UnoGameFlags.None)
 			{
 				this.Flags &= ~UnoGameFlags.ResetOnNextTurn;
+				this.drawAmount = 0;
 
 				return;
 			}
 
-			var drawAmount = ((this.Flags & UnoGameFlags.DrawTwo) != UnoGameFlags.None) ? 2 : 4;
+			this.drawAmount += ((this.Flags & UnoGameFlags.DrawTwo) != UnoGameFlags.None) ? 2 : 4;
 			var player = this.GetCurrentPlayer();
 
-			for (var i = 0; i < drawAmount; i++)
+			// If the player has a draw card, he can play it to stack it
+			if (player.HasDrawCard())
+			{
+				this.Flags &= ~UnoGameFlags.ResetOnNextTurn;
+
+				return;
+			}
+
+			for (var i = 0; i < this.drawAmount; i++)
 			{
 				this.AddCardToPlayer(player);
 			}
@@ -60,23 +73,27 @@ namespace CardGames.Core.Uno
 
 			// Skip the next player; if they have to draw, they don't get to play a card
 			this.NextTurn(UnoGame.GetNextPlayerModifier(this.Flags));
+
+			this.Flags &= ~UnoGameFlags.ResetOnNextTurn;
+
+			this.drawAmount = 0;
 		}
 
 		protected override void OnPlayerLeft(UnoPlayer _)
 		{
-			if (this.Players.Length == 1)
-			{
-				this.EndGame();
-
-				return;
-			}
-
 			// Adjust the current player to be a player that's actually in the game
 			// If we don't the game will crash/be infinitely stuck if the current player leaves
 			while (this.CurrentPlayerIndex >= this.Players.Length)
 			{
 				// @todo Add silent flag to not call `OnNextTurn`?
 				this.NextTurn();
+			}
+
+			if (this.Players.Length == 1)
+			{
+				this.EndGame();
+
+				return;
 			}
 
 			// If the game has finished and a player leaves,
@@ -90,6 +107,17 @@ namespace CardGames.Core.Uno
 		public void PlayCard(UnoPlayer player, Card card)
 		{
 			if (!this.CanPlayCard(player, card))
+			{
+				return;
+			}
+
+			// If the current card is a freshly played +2 or a +4
+			// and the player doesn't play a +2 or +4 but does have one,
+			// he's not allowed to play the card. He has to stack the draw card.
+			if ((this.drawAmount > 0) &&
+				(this.TopCard.Value is CardValue.DrawTwo or CardValue.DrawFour) &&
+				((card.Value != CardValue.DrawTwo) && (card.Value != CardValue.DrawFour)) &&
+				player.HasDrawCard())
 			{
 				return;
 			}

@@ -6,7 +6,13 @@
 
 @if (Game.State == GameState.Lobby)
 {
-	<h1>Game code: @(Game.Code.ToString())</h1>
+	<div>
+		<h1 class="d-inline-block">Game code: @(Game.Code.ToString())</h1>
+		<button type="button" class="btn btn-link" onclick="copyAsync('@(Game.Code.ToString())')">
+			Copy code
+		</button>
+	</div>
+
 	<p>Your name: @(CurrentPlayer.Name.Str())</p>
 
 	<ul role="list">
